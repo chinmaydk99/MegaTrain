@@ -18,6 +18,7 @@ import inspect
 import logging
 import copy
 import gc
+import time
 import threading
 import queue
 import torch
@@ -349,7 +350,7 @@ class CPUMasterModel:
         self.num_heads = cfg.num_attention_heads
         self.head_dim = cfg.hidden_size // cfg.num_attention_heads
 
-        # CPU master modules
+        # CPU master modules hold authoritative FP32 weights.
         self.embedding = components['embedding'].cpu()
         self.norm = components['norm'].cpu() if components['norm'] else None
         self.lm_head = components['lm_head'].cpu()
@@ -361,16 +362,23 @@ class CPUMasterModel:
             if self.tied_lm_head:
                 logger.info("Detected tied lm_head and embedding weights")
 
+        self.embedding = self.embedding.float()
+        if self.norm:
+            self.norm = self.norm.float()
+        self.lm_head = self.lm_head.float()
+        if self.tied_lm_head and hasattr(self.lm_head, "weight"):
+            self.lm_head.weight = self.embedding.weight
+
         # Model-level rotary embedding (modern HF models: Qwen2, Llama3, Mistral, etc.)
         # Older models (Llama2, GPT-2) compute position embeddings per-layer
-        self.rotary_emb = components['rotary_emb'].cpu() if components['rotary_emb'] else None
+        self.rotary_emb = components['rotary_emb'].cpu().float() if components['rotary_emb'] else None
         if self.rotary_emb:
             logger.info("Found model-level rotary_emb (Qwen2/Llama3/Mistral style)")
         else:
             logger.info("No model-level rotary_emb (layers handle position embeddings internally)")
 
         # CPU master layers
-        self.cpu_layers = [layer.cpu() for layer in components['layers']]
+        self.cpu_layers = [layer.cpu().float() for layer in components['layers']]
 
         # === Introspect layer forward signatures ===
         # Different model architectures accept different kwargs
@@ -448,7 +456,7 @@ class CPUMasterModel:
                 template = copy.deepcopy(self.cpu_layers[representative_idx])
                 # Preserve attention implementation before moving to GPU
                 _preserve_attn_implementation(template, self._model_config)
-                template = template.to(self.device)
+                template = template.to(device=self.device, dtype=config.dtype)
                 # Ensure no autograd graph is attached to template parameters
                 for p in template.parameters():
                     p.requires_grad_(False)
@@ -457,9 +465,9 @@ class CPUMasterModel:
 
         # GPU modules (created once, reused)
         logger.info("Creating GPU modules (once)...")
-        self.emb_gpu = copy.deepcopy(self.embedding).to(self.device)
-        self.norm_gpu = copy.deepcopy(self.norm).to(self.device) if self.norm else None
-        self.lm_head_gpu = copy.deepcopy(self.lm_head).to(self.device)
+        self.emb_gpu = copy.deepcopy(self.embedding).to(device=self.device, dtype=config.dtype)
+        self.norm_gpu = copy.deepcopy(self.norm).to(device=self.device, dtype=config.dtype) if self.norm else None
+        self.lm_head_gpu = copy.deepcopy(self.lm_head).to(device=self.device, dtype=config.dtype)
 
         # Restore weight tying on GPU if detected
         if self.tied_lm_head and hasattr(self.lm_head_gpu, "weight"):
@@ -586,10 +594,10 @@ class CPUMasterModel:
             for p_cpu, shape, numel in zip(cpu_params, shapes, numels):
                 grad_view = slab_flat[offset:offset + numel].view(shape)
                 if p_cpu.grad is None:
-                    p_cpu.grad = torch.empty_like(grad_view, device='cpu')
-                    p_cpu.grad.copy_(grad_view)
-                else:
-                    p_cpu.grad.add_(grad_view)
+                    p_cpu.grad = torch.zeros_like(p_cpu, device='cpu')
+                # CPU master params are authoritative FP32 weights, so slab grads
+                # from BF16/FP16 GPU work must be upcast before accumulation.
+                p_cpu.grad.add_(grad_view.to(device='cpu', dtype=p_cpu.grad.dtype))
                 offset += numel
 
             if slab_type == 'layer':
@@ -667,7 +675,7 @@ class CPUMasterModel:
     def _build_layer_kwargs(self, mask, cache_position, position_ids, position_embeddings):
         """Build kwargs dict for layer forward, based on what the layer accepts."""
         kwargs = {
-            'attention_mask': mask,
+            'attention_mask': self._prepare_attention_mask(mask),
             'use_cache': False,
             'output_attentions': False,
         }
@@ -678,6 +686,37 @@ class CPUMasterModel:
         if self.layer_accepts_position_ids and position_ids is not None:
             kwargs['position_ids'] = position_ids
         return kwargs
+
+    def _prepare_attention_mask(self, mask):
+        """Normalize attention mask shape for model families with custom expectations."""
+        if mask is None:
+            return None
+
+        attn_impl = getattr(self._model_config, "_attn_implementation", None)
+        if mask.dim() == 2 and attn_impl in {"sdpa", "eager"}:
+            batch_size, seq_len = mask.shape
+            padding_mask = mask.to(device=self.device) <= 0
+            causal_mask = torch.triu(
+                torch.ones((seq_len, seq_len), device=self.device, dtype=torch.bool),
+                diagonal=1,
+            )
+
+            additive_mask = torch.zeros(
+                (batch_size, 1, seq_len, seq_len),
+                device=self.device,
+                dtype=self.config.dtype,
+            )
+            additive_mask = additive_mask.masked_fill(
+                causal_mask.view(1, 1, seq_len, seq_len),
+                torch.finfo(self.config.dtype).min,
+            )
+            additive_mask = additive_mask.masked_fill(
+                padding_mask[:, None, None, :],
+                torch.finfo(self.config.dtype).min,
+            )
+            return additive_mask
+
+        return mask
 
     def _collect_layer_grads_async(self, layer_idx, buffer_idx):
         """Collect GPU buffer grads to CPU layer using K-slab flat buffer pool."""
@@ -701,6 +740,13 @@ class CPUMasterModel:
             self.layer_slab_events[slab_idx].record(self.grad_stream)
             # Template is free after grad D2H (NOT buffer_free — flat buffer freed at unflatten)
             self.template_free_events[buffer_idx].record(self.grad_stream)
+
+        expected_layer_numel = self.layer_numels[layer_idx]
+        if offset != expected_layer_numel:
+            logger.error(
+                f"Layer grad copy incomplete for layer {layer_idx}: "
+                f"copied {offset} / expected {expected_layer_numel} elements"
+            )
 
         self.grad_task_queue.put((
             'layer',
@@ -981,6 +1027,12 @@ class CPUMasterModel:
 
         if not torch.isfinite(torch.tensor(loss_val)):
             logger.error(f"Loss is {loss_val}! Training may be unstable.")
+        if not torch.isfinite(hidden_before_norm).all():
+            nonfinite_count = (~torch.isfinite(hidden_before_norm)).sum().item()
+            logger.error(f"Non-finite hidden_before_norm values before loss backward: {nonfinite_count}")
+        if not torch.isfinite(hidden_after_norm).all():
+            nonfinite_count = (~torch.isfinite(hidden_after_norm)).sum().item()
+            logger.error(f"Non-finite hidden_after_norm values before loss backward: {nonfinite_count}")
 
         loss.backward()
         self.loss_backward_done.record(self.compute_stream)
@@ -1001,6 +1053,7 @@ class CPUMasterModel:
                     if p_gpu.grad is not None:
                         numel = p_gpu.grad.numel()
                         slab_flat[offset:offset + numel].copy_(p_gpu.grad.flatten(), non_blocking=True)
+                        p_gpu.grad.record_stream(self.grad_stream)
                         p_gpu.grad = None
                         offset += numel
             if self.norm_gpu:
@@ -1008,6 +1061,7 @@ class CPUMasterModel:
                     if p_gpu.grad is not None:
                         numel = p_gpu.grad.numel()
                         slab_flat[offset:offset + numel].copy_(p_gpu.grad.flatten(), non_blocking=True)
+                        p_gpu.grad.record_stream(self.grad_stream)
                         p_gpu.grad = None
                         offset += numel
             self.head_slab_event.record(self.grad_stream)
@@ -1019,6 +1073,11 @@ class CPUMasterModel:
             cpu_params.extend(self.norm.parameters())
         shapes = [p.shape for p in cpu_params]
         numels = [p.numel() for p in cpu_params]
+        expected_head_numel = sum(numels)
+        if offset != expected_head_numel:
+            logger.error(
+                f"Head grad copy incomplete: copied {offset} / expected {expected_head_numel} elements"
+            )
         self.grad_task_queue.put(('head', None, cpu_params, shapes, numels))
 
         del labels_gpu, hidden_after_norm, hidden_before_norm, total_loss
@@ -1128,6 +1187,7 @@ class CPUMasterModel:
                 if p_gpu.grad is not None:
                     numel = p_gpu.grad.numel()
                     slab_flat[offset:offset + numel].copy_(p_gpu.grad.flatten(), non_blocking=True)
+                    p_gpu.grad.record_stream(self.grad_stream)
                     p_gpu.grad = None
                     offset += numel
             self.embed_slab_event.record(self.grad_stream)
@@ -1135,13 +1195,20 @@ class CPUMasterModel:
         cpu_params = list(self.embedding.parameters())
         shapes = [p.shape for p in cpu_params]
         numels = [p.numel() for p in cpu_params]
+        expected_embed_numel = sum(numels)
+        if offset != expected_embed_numel:
+            logger.error(
+                f"Embedding grad copy incomplete: copied {offset} / expected {expected_embed_numel} elements"
+            )
         self.grad_task_queue.put(('embed', None, cpu_params, shapes, numels))
 
         del input_ids_gpu, emb_out
         del mask, cache_position, position_ids, position_embeddings, grad_hidden
         checkpoints.clear()
 
+        grad_accum_wait_start = time.perf_counter()
         self._accumulate_grads_batch()
+        grad_accum_wait_time = time.perf_counter() - grad_accum_wait_start
 
         bwd_end.record()
         torch.cuda.synchronize()
@@ -1155,6 +1222,7 @@ class CPUMasterModel:
             'forward': fwd_time,
             'backward': bwd_time,
             'total': total_time,
+            'grad_accum_wait': grad_accum_wait_time,
         }
 
     def get_parameters(self, include_vision=False):
@@ -1203,6 +1271,26 @@ class CPUMasterModel:
                 seen.add(id(p))
 
         return params
+
+    def materialize_hf_model(self, hf_model):
+        """Copy CPU-master weights into a HuggingFace model for evaluation/export."""
+        target = _discover_model_components(hf_model)
+
+        if self.is_vlm and self.vision_encoder is not None and target.get("vision_encoder") is not None:
+            target["vision_encoder"].load_state_dict(self.vision_encoder.state_dict())
+        if self.is_vlm and self.projector is not None and target.get("projector") is not None:
+            target["projector"].load_state_dict(self.projector.state_dict())
+
+        target["embedding"].load_state_dict(self.embedding.state_dict())
+        for src_layer, dst_layer in zip(self.cpu_layers, target["layers"]):
+            dst_layer.load_state_dict(src_layer.state_dict())
+        if self.norm is not None and target.get("norm") is not None:
+            target["norm"].load_state_dict(self.norm.state_dict())
+        target["lm_head"].load_state_dict(self.lm_head.state_dict())
+        if self.rotary_emb is not None and target.get("rotary_emb") is not None:
+            target["rotary_emb"].load_state_dict(self.rotary_emb.state_dict())
+
+        return hf_model
 
     def zero_grad(self):
         for p in self.get_parameters():
