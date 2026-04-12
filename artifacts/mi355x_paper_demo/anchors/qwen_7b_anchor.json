@@ -1,0 +1,250 @@
+{
+  "log_path": "/mnt/c/Users/ckuchina/.cursor/projects/c-Users-ckuchina-Workspace-Upstream-CI/terminals/115527.txt",
+  "header": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "attention": "flash_attention_2",
+    "dataset": "metamath",
+    "batch_size": "96",
+    "training_steps": "20",
+    "learning_rate": "2e-05"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "total_steps": 20,
+      "loss": 0.6643,
+      "avg_loss": 0.6643,
+      "step_time_s": 44.83,
+      "tokens_per_s": 2192.9,
+      "gflops": 100203.6,
+      "gpu_gb": 46.86,
+      "cpu_gb": 101.95
+    },
+    {
+      "step": 2,
+      "total_steps": 20,
+      "loss": 0.204,
+      "avg_loss": 0.4341,
+      "step_time_s": 10.1,
+      "tokens_per_s": 9732.7,
+      "gflops": 444724.1,
+      "gpu_gb": 46.87,
+      "cpu_gb": 101.96
+    },
+    {
+      "step": 3,
+      "total_steps": 20,
+      "loss": 0.1639,
+      "avg_loss": 0.3441,
+      "step_time_s": 10.09,
+      "tokens_per_s": 9745.9,
+      "gflops": 445327.8,
+      "gpu_gb": 46.88,
+      "cpu_gb": 101.95
+    },
+    {
+      "step": 4,
+      "total_steps": 20,
+      "loss": 0.164,
+      "avg_loss": 0.299,
+      "step_time_s": 10.24,
+      "tokens_per_s": 9603.0,
+      "gflops": 438794.4,
+      "gpu_gb": 46.89,
+      "cpu_gb": 101.98
+    },
+    {
+      "step": 5,
+      "total_steps": 20,
+      "loss": 0.1648,
+      "avg_loss": 0.2722,
+      "step_time_s": 10.23,
+      "tokens_per_s": 9611.8,
+      "gflops": 439198.9,
+      "gpu_gb": 46.89,
+      "cpu_gb": 101.99
+    },
+    {
+      "step": 6,
+      "total_steps": 20,
+      "loss": 0.1709,
+      "avg_loss": 0.2553,
+      "step_time_s": 10.26,
+      "tokens_per_s": 9584.2,
+      "gflops": 437938.1,
+      "gpu_gb": 46.89,
+      "cpu_gb": 101.98
+    },
+    {
+      "step": 7,
+      "total_steps": 20,
+      "loss": 0.1413,
+      "avg_loss": 0.239,
+      "step_time_s": 10.14,
+      "tokens_per_s": 9693.2,
+      "gflops": 442920.1,
+      "gpu_gb": 46.89,
+      "cpu_gb": 101.98
+    },
+    {
+      "step": 8,
+      "total_steps": 20,
+      "loss": 0.1714,
+      "avg_loss": 0.2306,
+      "step_time_s": 10.53,
+      "tokens_per_s": 9338.6,
+      "gflops": 426715.1,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.95
+    },
+    {
+      "step": 9,
+      "total_steps": 20,
+      "loss": 0.1661,
+      "avg_loss": 0.2234,
+      "step_time_s": 10.45,
+      "tokens_per_s": 9405.1,
+      "gflops": 429753.2,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.96
+    },
+    {
+      "step": 10,
+      "total_steps": 20,
+      "loss": 0.1414,
+      "avg_loss": 0.2152,
+      "step_time_s": 10.21,
+      "tokens_per_s": 9628.4,
+      "gflops": 439956.6,
+      "gpu_gb": 46.9,
+      "cpu_gb": 102.0
+    },
+    {
+      "step": 11,
+      "total_steps": 20,
+      "loss": 0.1708,
+      "avg_loss": 0.2112,
+      "step_time_s": 10.56,
+      "tokens_per_s": 9308.5,
+      "gflops": 425339.3,
+      "gpu_gb": 46.9,
+      "cpu_gb": 102.0
+    },
+    {
+      "step": 12,
+      "total_steps": 20,
+      "loss": 0.1483,
+      "avg_loss": 0.2059,
+      "step_time_s": 10.57,
+      "tokens_per_s": 9302.4,
+      "gflops": 425062.3,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.97
+    },
+    {
+      "step": 13,
+      "total_steps": 20,
+      "loss": 0.1687,
+      "avg_loss": 0.2031,
+      "step_time_s": 10.52,
+      "tokens_per_s": 9342.1,
+      "gflops": 426876.6,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.98
+    },
+    {
+      "step": 14,
+      "total_steps": 20,
+      "loss": 0.161,
+      "avg_loss": 0.2001,
+      "step_time_s": 10.58,
+      "tokens_per_s": 9291.9,
+      "gflops": 424581.2,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.99
+    },
+    {
+      "step": 15,
+      "total_steps": 20,
+      "loss": 0.1667,
+      "avg_loss": 0.1978,
+      "step_time_s": 10.62,
+      "tokens_per_s": 9259.6,
+      "gflops": 423103.5,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.99
+    },
+    {
+      "step": 16,
+      "total_steps": 20,
+      "loss": 0.1689,
+      "avg_loss": 0.196,
+      "step_time_s": 10.56,
+      "tokens_per_s": 9307.2,
+      "gflops": 425279.1,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.97
+    },
+    {
+      "step": 17,
+      "total_steps": 20,
+      "loss": 0.1539,
+      "avg_loss": 0.1935,
+      "step_time_s": 10.58,
+      "tokens_per_s": 9292.7,
+      "gflops": 424618.5,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.98
+    },
+    {
+      "step": 18,
+      "total_steps": 20,
+      "loss": 0.1636,
+      "avg_loss": 0.1919,
+      "step_time_s": 10.62,
+      "tokens_per_s": 9258.2,
+      "gflops": 423041.6,
+      "gpu_gb": 46.9,
+      "cpu_gb": 102.0
+    },
+    {
+      "step": 19,
+      "total_steps": 20,
+      "loss": 0.1632,
+      "avg_loss": 0.1904,
+      "step_time_s": 10.75,
+      "tokens_per_s": 9142.0,
+      "gflops": 417732.8,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.97
+    },
+    {
+      "step": 20,
+      "total_steps": 20,
+      "loss": 0.1673,
+      "avg_loss": 0.1892,
+      "step_time_s": 10.7,
+      "tokens_per_s": 9184.4,
+      "gflops": 419668.8,
+      "gpu_gb": 46.9,
+      "cpu_gb": 101.98
+    }
+  ],
+  "summary": {
+    "initial_loss": 0.6643,
+    "final_loss": 0.1673,
+    "loss_reduction_pct": 74.8,
+    "peak_gpu_gb": 46.9,
+    "peak_cpu_gb": 102.0,
+    "avg_latency_s": 12.156,
+    "avg_gflops": 414041.8,
+    "exact_match_pct": 65.62,
+    "exact_match_correct": 42,
+    "exact_match_total": 64,
+    "steady_state_avg_gflops": 430559.5789473684,
+    "steady_state_avg_tokens_per_s": 9422.731578947369,
+    "steady_state_avg_step_time_s": 10.437368421052632,
+    "steady_state_peak_gpu_gb": 46.9,
+    "steady_state_peak_cpu_gb": 102.0
+  }
+}

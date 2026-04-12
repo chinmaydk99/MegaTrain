@@ -1,0 +1,57 @@
+{
+  "config": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/examples/configs/qwen_14b_rocm_batch_sweep.yaml",
+  "method": "zero3_cpu_offload",
+  "batch_sizes": [
+    8,
+    12,
+    16,
+    20,
+    24,
+    32
+  ],
+  "num_steps": 5,
+  "runs": [
+    {
+      "batch_size": 8,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs8.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs8.json"
+    },
+    {
+      "batch_size": 12,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs12.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs12.json"
+    },
+    {
+      "batch_size": 16,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs16.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs16.json"
+    },
+    {
+      "batch_size": 20,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs20.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs20.json"
+    },
+    {
+      "batch_size": 24,
+      "status": "skipped_existing",
+      "success": false,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs24.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs24.json"
+    },
+    {
+      "batch_size": 32,
+      "status": "skipped_existing",
+      "success": false,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs32.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_zero3_cpu_offload_bs32.json"
+    }
+  ]
+}

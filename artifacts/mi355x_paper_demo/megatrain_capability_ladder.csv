@@ -1,0 +1,5 @@
+model_name,model_size_b,batch_size,throughput_tflops,throughput_note,gpu_gb,cpu_gb
+Qwen2.5-7B-Instruct,7,96,406.5,average,46.93,102.4
+Qwen2.5-14B-Instruct,14,256,507.2,average,137.13,190.56
+Qwen2.5-32B-Instruct,32,300,524.6,average,221.0,393.24
+Qwen2.5-72B-Instruct,72,200,556.1,proof-of-life step 2,215.27,855.8

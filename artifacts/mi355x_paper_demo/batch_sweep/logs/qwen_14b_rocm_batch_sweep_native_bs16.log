@@ -1,0 +1,68 @@
+/opt/venv/lib/python3.12/site-packages/apex/transformer/functional/fused_rope.py:54: UserWarning: Using the native apex kernel for RoPE.
+  warnings.warn("Using the native apex kernel for RoPE.", UserWarning)
+18:26:53 [INFO] ======================================================================
+18:26:53 [INFO] OFFLOAD BASELINE BENCHMARK
+18:26:53 [INFO] ======================================================================
+18:26:53 [INFO] Mode: native
+18:26:53 [INFO] Model: Qwen/Qwen2.5-14B-Instruct
+18:26:53 [INFO] Attention: flash_attention_2
+18:26:53 [INFO] Dataset: metamath
+18:26:53 [INFO] Batch size: 16
+18:26:53 [INFO] Training steps: 5
+18:26:53 [INFO] Learning rate: 2e-05
+18:26:53 [INFO] Loading tokenizer...
+18:26:53 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:26:53 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:26:54 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+18:26:54 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/tokenizer_config.json "HTTP/1.1 200 OK"
+18:26:54 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+18:26:54 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+18:26:54 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct "HTTP/1.1 200 OK"
+18:26:54 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:26:54 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:26:54 [INFO] Loading model with attn_implementation='flash_attention_2'...
+18:26:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:26:55 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|██████████| 579/579 [00:00<00:00, 15170.74it/s]
+18:26:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+18:26:55 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/generation_config.json "HTTP/1.1 200 OK"
+18:26:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+18:26:55 [INFO] Gradient checkpointing enabled
+18:26:55 [INFO] Loading from HuggingFace Hub: meta-math/MetaMathQA
+18:26:56 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+18:26:56 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/meta-math/MetaMathQA/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/README.md "HTTP/1.1 200 OK"
+18:26:56 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:26:56 [INFO] HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/meta-math/MetaMathQA/meta-math/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:26:56 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/revision/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18 "HTTP/1.1 200 OK"
+18:26:56 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/.huggingface.yaml "HTTP/1.1 404 Not Found"
+18:26:57 [INFO] HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=meta-math/MetaMathQA "HTTP/1.1 200 OK"
+18:26:57 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/data?recursive=true&expand=false "HTTP/1.1 404 Not Found"
+18:26:57 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18?recursive=false&expand=false "HTTP/1.1 200 OK"
+18:26:57 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/dataset_infos.json "HTTP/1.1 404 Not Found"
+18:26:57 [INFO] Loaded 395000 samples, columns: ['type', 'query', 'original_question', 'response']
+18:26:57 [INFO] ChatDataset: 395000 samples, max_seq_len=1024
+18:26:57 [INFO] Using deterministic split: 276500 train / 118500 eval (seed=42)
+18:26:57 [INFO] Initializing native single-GPU training baseline
+18:27:04 [INFO] ======================================================================
+18:27:04 [INFO] Starting baseline training...
+18:27:04 [INFO] ======================================================================
+18:27:12 [INFO] Step 1/5 | Loss 0.6765 | Avg 0.6765
+18:27:12 [INFO]   Time: 8.40s | Tokens/s 347.3 | GFLOPS 30778.2
+18:27:12 [INFO]   FWD: 3.85s | BWD: 4.26s
+18:27:12 [INFO]   Breakdown: fwd_bwd 8.11s | clip 0.07s | optim 0.20s
+18:27:12 [INFO]   GPU: 214.26GB (alloc 87.47GB / reserved 215.40GB)
+18:27:12 [INFO]   CPU: 5.94GB
+18:27:12 [INFO]   Grad norm: 25.8750
+Traceback (most recent call last):
+  File "/root/MegaTrain/scripts/benchmark_offload_baseline.py", line 452, in <module>
+    run()
+  File "/root/MegaTrain/scripts/benchmark_offload_baseline.py", line 330, in run
+    loss.backward()
+  File "/tmp/pytorch/torch/_tensor.py", line 631, in backward
+    torch.autograd.backward(
+  File "/tmp/pytorch/torch/autograd/__init__.py", line 379, in backward
+    _engine_run_backward(
+  File "/tmp/pytorch/torch/autograd/graph.py", line 882, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 9.28 GiB. GPU 0 has a total capacity of 287.98 GiB of which 6.91 GiB is free. Of the allocated memory 260.26 GiB is allocated by PyTorch, and 18.28 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)

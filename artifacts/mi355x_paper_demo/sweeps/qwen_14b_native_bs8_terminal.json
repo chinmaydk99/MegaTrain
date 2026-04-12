@@ -1,0 +1,50 @@
+{
+  "log_path": "/mnt/c/Users/ckuchina/.cursor/projects/c-Users-ckuchina-Workspace-Upstream-CI/terminals/786006.txt",
+  "header": {
+    "mode": "native",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "attention": "flash_attention_2",
+    "dataset": "metamath",
+    "batch_size": "8",
+    "training_steps": "2",
+    "learning_rate": "2e-05"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "total_steps": 2,
+      "loss": 0.6804,
+      "avg_loss": 0.6804,
+      "step_time_s": 7.88,
+      "tokens_per_s": 159.0,
+      "gflops": 14088.4,
+      "gpu_gb": 140.33,
+      "cpu_gb": 5.93
+    },
+    {
+      "step": 2,
+      "total_steps": 2,
+      "loss": 0.2652,
+      "avg_loss": 0.4728,
+      "step_time_s": 0.98,
+      "tokens_per_s": 1201.8,
+      "gflops": 106500.9,
+      "gpu_gb": 175.6,
+      "cpu_gb": 5.93
+    }
+  ],
+  "summary": {
+    "initial_loss": 0.6804,
+    "final_loss": 0.2652,
+    "loss_reduction_pct": 61.0,
+    "peak_gpu_gb": 175.6,
+    "peak_cpu_gb": 5.93,
+    "avg_latency_s": 4.428,
+    "avg_gflops": 60294.7,
+    "steady_state_avg_gflops": 106500.9,
+    "steady_state_avg_tokens_per_s": 1201.8,
+    "steady_state_avg_step_time_s": 0.98,
+    "steady_state_peak_gpu_gb": 175.6,
+    "steady_state_peak_cpu_gb": 5.93
+  }
+}

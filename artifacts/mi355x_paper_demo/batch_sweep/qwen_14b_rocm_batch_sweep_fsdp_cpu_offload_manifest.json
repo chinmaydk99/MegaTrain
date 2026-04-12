@@ -1,0 +1,25 @@
+{
+  "config": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/examples/configs/qwen_14b_rocm_batch_sweep.yaml",
+  "method": "fsdp_cpu_offload",
+  "batch_sizes": [
+    8,
+    16
+  ],
+  "num_steps": 5,
+  "runs": [
+    {
+      "batch_size": 8,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_fsdp_cpu_offload_bs8.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_fsdp_cpu_offload_bs8.json"
+    },
+    {
+      "batch_size": 16,
+      "status": "skipped_existing",
+      "success": true,
+      "log_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_fsdp_cpu_offload_bs16.log",
+      "summary_path": "/mnt/c/Users/ckuchina/Workspace/Upstream_CI/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/summaries/qwen_14b_rocm_batch_sweep_fsdp_cpu_offload_bs16.json"
+    }
+  ]
+}

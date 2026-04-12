@@ -1,0 +1,98 @@
+/opt/venv/lib/python3.12/site-packages/apex/transformer/functional/fused_rope.py:54: UserWarning: Using the native apex kernel for RoPE.
+  warnings.warn("Using the native apex kernel for RoPE.", UserWarning)
+18:25:53 [INFO] ======================================================================
+18:25:53 [INFO] OFFLOAD BASELINE BENCHMARK
+18:25:53 [INFO] ======================================================================
+18:25:53 [INFO] Mode: native
+18:25:53 [INFO] Model: Qwen/Qwen2.5-14B-Instruct
+18:25:53 [INFO] Attention: flash_attention_2
+18:25:53 [INFO] Dataset: metamath
+18:25:53 [INFO] Batch size: 8
+18:25:53 [INFO] Training steps: 5
+18:25:53 [INFO] Learning rate: 2e-05
+18:25:53 [INFO] Loading tokenizer...
+18:25:54 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:25:54 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:25:54 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+18:25:54 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/tokenizer_config.json "HTTP/1.1 200 OK"
+18:25:54 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+18:25:54 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+18:25:55 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct "HTTP/1.1 200 OK"
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:25:55 [INFO] Loading model with attn_implementation='flash_attention_2'...
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|██████████| 579/579 [00:00<00:00, 15059.54it/s]
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+18:25:55 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/generation_config.json "HTTP/1.1 200 OK"
+18:25:56 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+18:25:56 [INFO] Gradient checkpointing enabled
+18:25:56 [INFO] Loading from HuggingFace Hub: meta-math/MetaMathQA
+18:25:56 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+18:25:56 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/meta-math/MetaMathQA/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/README.md "HTTP/1.1 200 OK"
+18:25:56 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:25:57 [INFO] HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/meta-math/MetaMathQA/meta-math/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:25:57 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/revision/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18 "HTTP/1.1 200 OK"
+18:25:57 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/.huggingface.yaml "HTTP/1.1 404 Not Found"
+18:25:57 [INFO] HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=meta-math/MetaMathQA "HTTP/1.1 200 OK"
+18:25:57 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/data?recursive=true&expand=false "HTTP/1.1 404 Not Found"
+18:25:58 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18?recursive=false&expand=false "HTTP/1.1 200 OK"
+18:25:58 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/dataset_infos.json "HTTP/1.1 404 Not Found"
+18:25:58 [INFO] Loaded 395000 samples, columns: ['type', 'query', 'original_question', 'response']
+18:25:58 [INFO] ChatDataset: 395000 samples, max_seq_len=1024
+18:25:58 [INFO] Using deterministic split: 276500 train / 118500 eval (seed=42)
+18:25:58 [INFO] Initializing native single-GPU training baseline
+18:26:04 [INFO] ======================================================================
+18:26:04 [INFO] Starting baseline training...
+18:26:04 [INFO] ======================================================================
+18:26:12 [INFO] Step 1/5 | Loss 0.6297 | Avg 0.6297
+18:26:12 [INFO]   Time: 7.74s | Tokens/s 219.9 | GFLOPS 19484.8
+18:26:12 [INFO]   FWD: 3.72s | BWD: 3.73s
+18:26:12 [INFO]   Breakdown: fwd_bwd 7.45s | clip 0.07s | optim 0.20s
+18:26:12 [INFO]   GPU: 140.34GB (alloc 85.16GB / reserved 150.94GB)
+18:26:12 [INFO]   CPU: 5.92GB
+18:26:12 [INFO]   Grad norm: 25.5000
+18:26:13 [INFO] Step 2/5 | Loss 0.1973 | Avg 0.4135
+18:26:13 [INFO]   Time: 0.99s | Tokens/s 1233.7 | GFLOPS 109326.8
+18:26:13 [INFO]   FWD: 0.25s | BWD: 0.52s
+18:26:13 [INFO]   Breakdown: fwd_bwd 0.77s | clip 0.01s | optim 0.18s
+18:26:13 [INFO]   GPU: 176.06GB (alloc 85.16GB / reserved 206.00GB)
+18:26:13 [INFO]   CPU: 5.92GB
+18:26:13 [INFO]   Grad norm: 7.2812
+18:26:14 [INFO] Step 3/5 | Loss 0.1594 | Avg 0.3288
+18:26:14 [INFO]   Time: 1.01s | Tokens/s 1923.0 | GFLOPS 170420.6
+18:26:14 [INFO]   FWD: 0.25s | BWD: 0.54s
+18:26:14 [INFO]   Breakdown: fwd_bwd 0.79s | clip 0.01s | optim 0.18s
+18:26:14 [INFO]   GPU: 176.77GB (alloc 85.16GB / reserved 206.01GB)
+18:26:14 [INFO]   CPU: 5.92GB
+18:26:14 [INFO]   Grad norm: 3.0625
+18:26:15 [INFO] Step 4/5 | Loss 0.2074 | Avg 0.2985
+18:26:15 [INFO]   Time: 0.98s | Tokens/s 1202.6 | GFLOPS 106574.0
+18:26:15 [INFO]   FWD: 0.25s | BWD: 0.51s
+18:26:15 [INFO]   Breakdown: fwd_bwd 0.76s | clip 0.01s | optim 0.18s
+18:26:15 [INFO]   GPU: 176.77GB (alloc 85.16GB / reserved 206.01GB)
+18:26:15 [INFO]   CPU: 5.92GB
+18:26:15 [INFO]   Grad norm: 3.7969
+18:26:16 [INFO] Step 5/5 | Loss 0.1446 | Avg 0.2677
+18:26:16 [INFO]   Time: 0.99s | Tokens/s 1318.9 | GFLOPS 116882.8
+18:26:16 [INFO]   FWD: 0.25s | BWD: 0.52s
+18:26:16 [INFO]   Breakdown: fwd_bwd 0.77s | clip 0.01s | optim 0.18s
+18:26:16 [INFO]   GPU: 176.77GB (alloc 85.16GB / reserved 206.01GB)
+18:26:16 [INFO]   CPU: 5.92GB
+18:26:16 [INFO]   Grad norm: 2.9531
+18:26:16 [INFO] ======================================================================
+18:26:16 [INFO] TRAINING COMPLETE
+18:26:16 [INFO] ======================================================================
+18:26:16 [INFO] Loss: 0.6297 -> 0.1446 (77.0% reduction)
+18:26:16 [INFO] Peak GPU: 176.77 GB
+18:26:16 [INFO] Peak CPU: 5.92 GB
+18:26:16 [INFO] 
+18:26:16 [INFO] Performance Metrics:
+18:26:16 [INFO]   Avg Latency: 2.342s per step
+18:26:16 [INFO]   Avg Throughput: 104537.8 GFLOPS
+18:26:16 [INFO] Timing Breakdown:
+18:26:16 [INFO]   Avg forward: 0.945s
+18:26:16 [INFO]   Avg backward: 1.164s
+18:26:16 [INFO]   Avg clip_grad_norm: 0.021s
+18:26:16 [INFO]   Avg optimizer.step: 0.187s

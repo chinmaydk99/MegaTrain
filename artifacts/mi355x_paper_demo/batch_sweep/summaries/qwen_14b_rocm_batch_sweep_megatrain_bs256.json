@@ -1,0 +1,82 @@
+{
+  "log_path": "/root/MegaTrain/artifacts/mi355x_paper_demo/batch_sweep/logs/qwen_14b_rocm_batch_sweep_megatrain_bs256.log",
+  "header": {
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "attention": "flash_attention_2",
+    "dataset": "metamath",
+    "batch_size": "256",
+    "training_steps": "5",
+    "learning_rate": "2e-05"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "total_steps": 5,
+      "loss": 0.6963,
+      "avg_loss": 0.6963,
+      "step_time_s": 96.39,
+      "tokens_per_s": 2719.7,
+      "gflops": 241023.4,
+      "gpu_gb": 137.06,
+      "cpu_gb": 190.44
+    },
+    {
+      "step": 2,
+      "total_steps": 5,
+      "loss": 0.1948,
+      "avg_loss": 0.4455,
+      "step_time_s": 44.04,
+      "tokens_per_s": 5952.8,
+      "gflops": 527537.7,
+      "gpu_gb": 137.13,
+      "cpu_gb": 190.49
+    },
+    {
+      "step": 3,
+      "total_steps": 5,
+      "loss": 0.1908,
+      "avg_loss": 0.3606,
+      "step_time_s": 44.16,
+      "tokens_per_s": 5936.5,
+      "gflops": 526092.5,
+      "gpu_gb": 137.13,
+      "cpu_gb": 190.47
+    },
+    {
+      "step": 4,
+      "total_steps": 5,
+      "loss": 0.1746,
+      "avg_loss": 0.3141,
+      "step_time_s": 44.09,
+      "tokens_per_s": 5945.9,
+      "gflops": 526925.7,
+      "gpu_gb": 137.13,
+      "cpu_gb": 190.46
+    },
+    {
+      "step": 5,
+      "total_steps": 5,
+      "loss": 0.1843,
+      "avg_loss": 0.2882,
+      "step_time_s": 44.14,
+      "tokens_per_s": 5938.5,
+      "gflops": 526274.8,
+      "gpu_gb": 137.13,
+      "cpu_gb": 190.47
+    }
+  ],
+  "summary": {
+    "initial_loss": 0.6963,
+    "final_loss": 0.1843,
+    "loss_reduction_pct": 73.5,
+    "peak_gpu_gb": 137.13,
+    "peak_cpu_gb": 190.49,
+    "avg_latency_s": 54.562,
+    "avg_gflops": 469570.8,
+    "steady_state_avg_gflops": 526707.675,
+    "steady_state_avg_tokens_per_s": 5943.425,
+    "steady_state_avg_step_time_s": 44.1075,
+    "steady_state_peak_gpu_gb": 137.13,
+    "steady_state_peak_cpu_gb": 190.49
+  }
+}

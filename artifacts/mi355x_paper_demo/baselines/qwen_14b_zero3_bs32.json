@@ -1,0 +1,9 @@
+{
+  "success": false,
+  "mode": "zero3_cpu_offload",
+  "model_name": "Qwen/Qwen2.5-14B-Instruct",
+  "batch_size": 32,
+  "num_steps": 5,
+  "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 864.00 MiB. GPU 0 has a total capacity of 287.98 GiB of which 530.00 MiB is free. Of the allocated memory 280.22 GiB is allocated by PyTorch, and 4.29 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')",
+  "steps": []
+}

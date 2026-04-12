@@ -1,0 +1,32 @@
+{
+  "log_path": "/mnt/c/Users/ckuchina/.cursor/projects/c-Users-ckuchina-Workspace-Upstream-CI/terminals/281134.txt",
+  "header": {
+    "mode": "native",
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "attention": "flash_attention_2",
+    "dataset": "metamath",
+    "batch_size": "16",
+    "training_steps": "2",
+    "learning_rate": "2e-05"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "total_steps": 2,
+      "loss": 0.7519,
+      "avg_loss": 0.7519,
+      "step_time_s": 8.51,
+      "tokens_per_s": 285.4,
+      "gflops": 25294.7,
+      "gpu_gb": 213.38,
+      "cpu_gb": 5.82
+    }
+  ],
+  "summary": {
+    "steady_state_avg_gflops": 25294.7,
+    "steady_state_avg_tokens_per_s": 285.4,
+    "steady_state_avg_step_time_s": 8.51,
+    "steady_state_peak_gpu_gb": 213.38,
+    "steady_state_peak_cpu_gb": 5.82
+  }
+}

@@ -1,0 +1,3 @@
+method,batch_size,status,steady_tflops,steady_tokens_per_s,peak_gpu_gb,peak_cpu_gb,error
+FSDP + CPU offload,8,success,13.494923548927483,152.2781854115378,149.07195472717285,126.62194061279297,
+FSDP + CPU offload,16,success,23.90696994984398,269.7688497049497,241.98081398010254,126.68257904052734,

@@ -1,0 +1,521 @@
+{
+  "methodology": {
+    "scope": "single MI355X, single-node, single-accelerator benchmark",
+    "headline_comparison": "MegaTrain vs DeepSpeed ZeRO-3 + CPU offload",
+    "native_role": "calibration baseline only where full GPU residency still fits",
+    "dataset": "MetaMathQA",
+    "max_seq_len": 1024,
+    "split": "70/30 deterministic split (seed 42)",
+    "throughput_definition": "steady-state after dropping step 1 warmup",
+    "sweep_config": "examples/configs/qwen_14b_rocm_batch_sweep.yaml"
+  },
+  "same_workload_14b": {
+    "batch_size": 16,
+    "rows": [
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 109.38427499999999,
+        "steady_tokens_per_s": 1234.3,
+        "peak_gpu_gb": 16.78,
+        "peak_cpu_gb": 190.47,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 37.36012392373297,
+        "steady_tokens_per_s": 421.5757026877256,
+        "peak_gpu_gb": 214.0747675895691,
+        "peak_cpu_gb": 344.09004974365234,
+        "error": null
+      },
+      {
+        "method": "PyTorch Native",
+        "status": "oom",
+        "batch_size": 16,
+        "steady_tflops": null,
+        "steady_tokens_per_s": null,
+        "peak_gpu_gb": 214.25896835327148,
+        "peak_cpu_gb": 5.938121795654297,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 9.28 GiB. GPU 0 has a total capacity of 287.98 GiB of which 6.91 GiB is free. Of the allocated memory 260.26 GiB is allocated by PyTorch, and 18.28 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      }
+    ],
+    "megatrain_vs_zero3_speedup": 2.9278349082379185
+  },
+  "validated_batch_ceiling_14b": {
+    "rows": [
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 256,
+        "steady_tflops": 526.707675,
+        "steady_tokens_per_s": 5943.425,
+        "peak_gpu_gb": 137.13,
+        "peak_cpu_gb": 190.49,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 20,
+        "steady_tflops": 42.16602936209539,
+        "steady_tokens_per_s": 475.80606247894,
+        "peak_gpu_gb": 260.9441409111023,
+        "peak_cpu_gb": 344.0581741333008,
+        "error": null
+      },
+      {
+        "method": "PyTorch Native",
+        "status": "success",
+        "batch_size": 12,
+        "steady_tflops": 134.33503428626202,
+        "steady_tokens_per_s": 1515.8511409228747,
+        "peak_gpu_gb": 223.28188371658325,
+        "peak_cpu_gb": 5.819671630859375,
+        "error": null
+      }
+    ],
+    "zero3_first_oom_batch": 24,
+    "native_first_oom_batch": 16,
+    "megatrain_validated_batch": 256
+  },
+  "batch_scaling_14b": {
+    "MegaTrain": {
+      "points": [
+        {
+          "batch_size": 16,
+          "steady_tflops": 109.38427499999999
+        },
+        {
+          "batch_size": 32,
+          "steady_tflops": 217.28292499999998
+        },
+        {
+          "batch_size": 64,
+          "steady_tflops": 367.79609999999997
+        },
+        {
+          "batch_size": 96,
+          "steady_tflops": 424.082425
+        },
+        {
+          "batch_size": 128,
+          "steady_tflops": 466.5173
+        },
+        {
+          "batch_size": 192,
+          "steady_tflops": 507.418375
+        },
+        {
+          "batch_size": 256,
+          "steady_tflops": 526.707675
+        }
+      ],
+      "memory_points": [
+        {
+          "batch_size": 16,
+          "peak_gpu_gb": 16.78,
+          "peak_cpu_gb": 190.47
+        },
+        {
+          "batch_size": 32,
+          "peak_gpu_gb": 24.1,
+          "peak_cpu_gb": 190.49
+        },
+        {
+          "batch_size": 64,
+          "peak_gpu_gb": 39.68,
+          "peak_cpu_gb": 190.5
+        },
+        {
+          "batch_size": 96,
+          "peak_gpu_gb": 55.52,
+          "peak_cpu_gb": 190.5
+        },
+        {
+          "batch_size": 128,
+          "peak_gpu_gb": 71.46,
+          "peak_cpu_gb": 190.51
+        },
+        {
+          "batch_size": 192,
+          "peak_gpu_gb": 104.3,
+          "peak_cpu_gb": 190.48
+        },
+        {
+          "batch_size": 256,
+          "peak_gpu_gb": 137.13,
+          "peak_cpu_gb": 190.49
+        }
+      ],
+      "oom_batch_sizes": []
+    },
+    "ZeRO-3 + CPU offload": {
+      "points": [
+        {
+          "batch_size": 8,
+          "steady_tflops": 20.548006443600087
+        },
+        {
+          "batch_size": 12,
+          "steady_tflops": 28.800024757247193
+        },
+        {
+          "batch_size": 16,
+          "steady_tflops": 37.36012392373297
+        },
+        {
+          "batch_size": 20,
+          "steady_tflops": 42.16602936209539
+        }
+      ],
+      "memory_points": [
+        {
+          "batch_size": 8,
+          "peak_gpu_gb": 121.23039960861206,
+          "peak_cpu_gb": 344.0502281188965
+        },
+        {
+          "batch_size": 12,
+          "peak_gpu_gb": 167.75068187713623,
+          "peak_cpu_gb": 343.9688835144043
+        },
+        {
+          "batch_size": 16,
+          "peak_gpu_gb": 214.0747675895691,
+          "peak_cpu_gb": 344.09004974365234
+        },
+        {
+          "batch_size": 20,
+          "peak_gpu_gb": 260.9441409111023,
+          "peak_cpu_gb": 344.0581741333008
+        }
+      ],
+      "oom_batch_sizes": [
+        24,
+        32
+      ]
+    },
+    "PyTorch Native": {
+      "points": [
+        {
+          "batch_size": 4,
+          "steady_tflops": 111.10795367430396
+        },
+        {
+          "batch_size": 8,
+          "steady_tflops": 125.8010632500471
+        },
+        {
+          "batch_size": 12,
+          "steady_tflops": 134.33503428626202
+        }
+      ],
+      "memory_points": [
+        {
+          "batch_size": 4,
+          "peak_gpu_gb": 139.47858810424805,
+          "peak_cpu_gb": 5.946449279785156
+        },
+        {
+          "batch_size": 8,
+          "peak_gpu_gb": 176.76919603347778,
+          "peak_cpu_gb": 5.9244842529296875
+        },
+        {
+          "batch_size": 12,
+          "peak_gpu_gb": 223.28188371658325,
+          "peak_cpu_gb": 5.819671630859375
+        }
+      ],
+      "oom_batch_sizes": [
+        16
+      ]
+    }
+  },
+  "sweep_rows_14b": {
+    "MegaTrain": [
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 109.38427499999999,
+        "steady_tokens_per_s": 1234.3,
+        "peak_gpu_gb": 16.78,
+        "peak_cpu_gb": 190.47,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 32,
+        "steady_tflops": 217.28292499999998,
+        "steady_tokens_per_s": 2451.85,
+        "peak_gpu_gb": 24.1,
+        "peak_cpu_gb": 190.49,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 64,
+        "steady_tflops": 367.79609999999997,
+        "steady_tokens_per_s": 4150.25,
+        "peak_gpu_gb": 39.68,
+        "peak_cpu_gb": 190.5,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 96,
+        "steady_tflops": 424.082425,
+        "steady_tokens_per_s": 4785.375,
+        "peak_gpu_gb": 55.52,
+        "peak_cpu_gb": 190.5,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 128,
+        "steady_tflops": 466.5173,
+        "steady_tokens_per_s": 5264.25,
+        "peak_gpu_gb": 71.46,
+        "peak_cpu_gb": 190.51,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 192,
+        "steady_tflops": 507.418375,
+        "steady_tokens_per_s": 5725.775,
+        "peak_gpu_gb": 104.3,
+        "peak_cpu_gb": 190.48,
+        "error": null
+      },
+      {
+        "method": "MegaTrain",
+        "status": "success",
+        "batch_size": 256,
+        "steady_tflops": 526.707675,
+        "steady_tokens_per_s": 5943.425,
+        "peak_gpu_gb": 137.13,
+        "peak_cpu_gb": 190.49,
+        "error": null
+      }
+    ],
+    "ZeRO-3 + CPU offload": [
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 8,
+        "steady_tflops": 20.548006443600087,
+        "steady_tokens_per_s": 231.86594008564708,
+        "peak_gpu_gb": 121.23039960861206,
+        "peak_cpu_gb": 344.0502281188965,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 12,
+        "steady_tflops": 28.800024757247193,
+        "steady_tokens_per_s": 324.9826124572241,
+        "peak_gpu_gb": 167.75068187713623,
+        "peak_cpu_gb": 343.9688835144043,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 37.36012392373297,
+        "steady_tokens_per_s": 421.5757026877256,
+        "peak_gpu_gb": 214.0747675895691,
+        "peak_cpu_gb": 344.09004974365234,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "success",
+        "batch_size": 20,
+        "steady_tflops": 42.16602936209539,
+        "steady_tokens_per_s": 475.80606247894,
+        "peak_gpu_gb": 260.9441409111023,
+        "peak_cpu_gb": 344.0581741333008,
+        "error": null
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "oom",
+        "batch_size": 24,
+        "steady_tflops": null,
+        "steady_tokens_per_s": null,
+        "peak_gpu_gb": null,
+        "peak_cpu_gb": null,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 13.92 GiB. GPU 0 has a total capacity of 287.98 GiB of which 1.46 GiB is free. Of the allocated memory 279.76 GiB is allocated by PyTorch, and 3.81 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      },
+      {
+        "method": "ZeRO-3 + CPU offload",
+        "status": "oom",
+        "batch_size": 32,
+        "steady_tflops": null,
+        "steady_tokens_per_s": null,
+        "peak_gpu_gb": null,
+        "peak_cpu_gb": null,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 864.00 MiB. GPU 0 has a total capacity of 287.98 GiB of which 224.00 MiB is free. Of the allocated memory 282.50 GiB is allocated by PyTorch, and 2.30 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      }
+    ],
+    "PyTorch Native": [
+      {
+        "method": "PyTorch Native",
+        "status": "success",
+        "batch_size": 4,
+        "steady_tflops": 111.10795367430396,
+        "steady_tokens_per_s": 1253.7542364704157,
+        "peak_gpu_gb": 139.47858810424805,
+        "peak_cpu_gb": 5.946449279785156,
+        "error": null
+      },
+      {
+        "method": "PyTorch Native",
+        "status": "success",
+        "batch_size": 8,
+        "steady_tflops": 125.8010632500471,
+        "steady_tokens_per_s": 1419.5528833567762,
+        "peak_gpu_gb": 176.76919603347778,
+        "peak_cpu_gb": 5.9244842529296875,
+        "error": null
+      },
+      {
+        "method": "PyTorch Native",
+        "status": "success",
+        "batch_size": 12,
+        "steady_tflops": 134.33503428626202,
+        "steady_tokens_per_s": 1515.8511409228747,
+        "peak_gpu_gb": 223.28188371658325,
+        "peak_cpu_gb": 5.819671630859375,
+        "error": null
+      },
+      {
+        "method": "PyTorch Native",
+        "status": "oom",
+        "batch_size": 16,
+        "steady_tflops": null,
+        "steady_tokens_per_s": null,
+        "peak_gpu_gb": 214.25896835327148,
+        "peak_cpu_gb": 5.938121795654297,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 9.28 GiB. GPU 0 has a total capacity of 287.98 GiB of which 6.91 GiB is free. Of the allocated memory 260.26 GiB is allocated by PyTorch, and 18.28 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      }
+    ]
+  },
+  "fsdp_probe_14b": {
+    "rows": [
+      {
+        "method": "FSDP + CPU offload",
+        "status": "success",
+        "batch_size": 8,
+        "steady_tflops": 13.494923548927483,
+        "steady_tokens_per_s": 152.2781854115378,
+        "peak_gpu_gb": 149.07195472717285,
+        "peak_cpu_gb": 126.62194061279297,
+        "error": null
+      },
+      {
+        "method": "FSDP + CPU offload",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 23.90696994984398,
+        "steady_tokens_per_s": 269.7688497049497,
+        "peak_gpu_gb": 241.98081398010254,
+        "peak_cpu_gb": 126.68257904052734,
+        "error": null
+      }
+    ],
+    "success_rows": [
+      {
+        "method": "FSDP + CPU offload",
+        "status": "success",
+        "batch_size": 8,
+        "steady_tflops": 13.494923548927483,
+        "steady_tokens_per_s": 152.2781854115378,
+        "peak_gpu_gb": 149.07195472717285,
+        "peak_cpu_gb": 126.62194061279297,
+        "error": null
+      },
+      {
+        "method": "FSDP + CPU offload",
+        "status": "success",
+        "batch_size": 16,
+        "steady_tflops": 23.90696994984398,
+        "steady_tokens_per_s": 269.7688497049497,
+        "peak_gpu_gb": 241.98081398010254,
+        "peak_cpu_gb": 126.68257904052734,
+        "error": null
+      }
+    ],
+    "failed_rows": []
+  },
+  "capability_ladder": [
+    {
+      "model_name": "Qwen2.5-7B-Instruct",
+      "model_size_b": 7,
+      "batch_size": 96,
+      "throughput_tflops": 406.5,
+      "throughput_note": "average",
+      "gpu_gb": 46.93,
+      "cpu_gb": 102.4
+    },
+    {
+      "model_name": "Qwen2.5-14B-Instruct",
+      "model_size_b": 14,
+      "batch_size": 256,
+      "throughput_tflops": 507.2,
+      "throughput_note": "average",
+      "gpu_gb": 137.13,
+      "cpu_gb": 190.56
+    },
+    {
+      "model_name": "Qwen2.5-32B-Instruct",
+      "model_size_b": 32,
+      "batch_size": 300,
+      "throughput_tflops": 524.6,
+      "throughput_note": "average",
+      "gpu_gb": 221.0,
+      "cpu_gb": 393.24
+    },
+    {
+      "model_name": "Qwen2.5-72B-Instruct",
+      "model_size_b": 72,
+      "batch_size": 200,
+      "throughput_tflops": 556.1,
+      "throughput_note": "proof-of-life step 2",
+      "gpu_gb": 215.27,
+      "cpu_gb": 855.8
+    }
+  ],
+  "baseline_failures": {
+    "megatrain": [],
+    "zero3_cpu_offload": [
+      {
+        "batch_size": 24,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 13.92 GiB. GPU 0 has a total capacity of 287.98 GiB of which 1.46 GiB is free. Of the allocated memory 279.76 GiB is allocated by PyTorch, and 3.81 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      },
+      {
+        "batch_size": 32,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 864.00 MiB. GPU 0 has a total capacity of 287.98 GiB of which 224.00 MiB is free. Of the allocated memory 282.50 GiB is allocated by PyTorch, and 2.30 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      }
+    ],
+    "native": [
+      {
+        "batch_size": 16,
+        "error": "OutOfMemoryError('CUDA out of memory. Tried to allocate 9.28 GiB. GPU 0 has a total capacity of 287.98 GiB of which 6.91 GiB is free. Of the allocated memory 260.26 GiB is allocated by PyTorch, and 18.28 GiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)')"
+      }
+    ]
+  }
+}

@@ -1,0 +1,100 @@
+/opt/venv/lib/python3.12/site-packages/apex/transformer/functional/fused_rope.py:54: UserWarning: Using the native apex kernel for RoPE.
+  warnings.warn("Using the native apex kernel for RoPE.", UserWarning)
+18:27:45 [INFO] ======================================================================
+18:27:45 [INFO] OFFLOAD BASELINE BENCHMARK
+18:27:45 [INFO] ======================================================================
+18:27:45 [INFO] Mode: fsdp_cpu_offload
+18:27:45 [INFO] Model: Qwen/Qwen2.5-14B-Instruct
+18:27:45 [INFO] Attention: flash_attention_2
+18:27:45 [INFO] Dataset: metamath
+18:27:45 [INFO] Batch size: 8
+18:27:45 [INFO] Training steps: 5
+18:27:45 [INFO] Learning rate: 2e-05
+18:27:45 [INFO] Loading tokenizer...
+18:27:45 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:27:45 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:27:46 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/tokenizer_config.json "HTTP/1.1 307 Temporary Redirect"
+18:27:46 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/tokenizer_config.json "HTTP/1.1 200 OK"
+18:27:46 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main/additional_chat_templates?recursive=false&expand=false "HTTP/1.1 404 Not Found"
+18:27:46 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct/tree/main?recursive=true&expand=false "HTTP/1.1 200 OK"
+18:27:46 [INFO] HTTP Request: GET https://huggingface.co/api/models/Qwen/Qwen2.5-14B-Instruct "HTTP/1.1 200 OK"
+18:27:46 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+18:27:47 [INFO] Loading model with attn_implementation='flash_attention_2'...
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/config.json "HTTP/1.1 307 Temporary Redirect"
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/config.json "HTTP/1.1 200 OK"
+Loading weights:   0%|          | 0/579 [00:00<?, ?it/s]Loading weights: 100%|██████████| 579/579 [00:00<00:00, 15016.99it/s]
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/generation_config.json "HTTP/1.1 307 Temporary Redirect"
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/models/Qwen/Qwen2.5-14B-Instruct/cf98f3b3bbb457ad9e2bb7baf9a0125b6b88caa8/generation_config.json "HTTP/1.1 200 OK"
+18:27:47 [INFO] HTTP Request: HEAD https://huggingface.co/Qwen/Qwen2.5-14B-Instruct/resolve/main/custom_generate/generate.py "HTTP/1.1 404 Not Found"
+18:27:47 [INFO] Gradient checkpointing enabled
+18:27:48 [INFO] Loading from HuggingFace Hub: meta-math/MetaMathQA
+18:27:48 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/main/README.md "HTTP/1.1 307 Temporary Redirect"
+18:27:48 [INFO] HTTP Request: HEAD https://huggingface.co/api/resolve-cache/datasets/meta-math/MetaMathQA/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/README.md "HTTP/1.1 200 OK"
+18:27:48 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:27:48 [INFO] HTTP Request: HEAD https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets/meta-math/MetaMathQA/meta-math/MetaMathQA.py "HTTP/1.1 404 Not Found"
+18:27:48 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/revision/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18 "HTTP/1.1 200 OK"
+18:27:49 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/.huggingface.yaml "HTTP/1.1 404 Not Found"
+18:27:49 [INFO] HTTP Request: GET https://datasets-server.huggingface.co/info?dataset=meta-math/MetaMathQA "HTTP/1.1 200 OK"
+18:27:49 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/data?recursive=true&expand=false "HTTP/1.1 404 Not Found"
+18:27:49 [INFO] HTTP Request: GET https://huggingface.co/api/datasets/meta-math/MetaMathQA/tree/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18?recursive=false&expand=false "HTTP/1.1 200 OK"
+18:27:49 [INFO] HTTP Request: HEAD https://huggingface.co/datasets/meta-math/MetaMathQA/resolve/aa4f34d3d2d3231299b5b03d9b3e5a20da45aa18/dataset_infos.json "HTTP/1.1 404 Not Found"
+18:27:49 [INFO] Loaded 395000 samples, columns: ['type', 'query', 'original_question', 'response']
+18:27:49 [INFO] ChatDataset: 395000 samples, max_seq_len=1024
+18:27:50 [INFO] Using deterministic split: 276500 train / 118500 eval (seed=42)
+18:27:50 [INFO] Initializing FSDP with CPU offload
+/tmp/pytorch/torch/distributed/fsdp/fully_sharded_data_parallel.py:478: UserWarning: FSDP is switching to use `NO_SHARD` instead of ShardingStrategy.FULL_SHARD since the world size is 1.
+  _init_core_state(
+18:27:59 [INFO] ======================================================================
+18:27:59 [INFO] Starting baseline training...
+18:27:59 [INFO] ======================================================================
+18:28:27 [INFO] Step 1/5 | Loss 0.6297 | Avg 0.6297
+18:28:27 [INFO]   Time: 27.50s | Tokens/s 61.9 | GFLOPS 5481.9
+18:28:27 [INFO]   FWD: 10.88s | BWD: 8.83s
+18:28:27 [INFO]   Breakdown: fwd_bwd 19.72s | clip 1.14s | optim 6.65s
+18:28:27 [INFO]   GPU: 148.56GB (alloc 29.98GB / reserved 187.53GB)
+18:28:27 [INFO]   CPU: 126.62GB
+18:28:27 [INFO]   Grad norm: 25.5000
+18:28:36 [INFO] Step 2/5 | Loss 0.1980 | Avg 0.4138
+18:28:36 [INFO]   Time: 9.06s | Tokens/s 134.3 | GFLOPS 11900.7
+18:28:36 [INFO]   FWD: 0.77s | BWD: 1.57s
+18:28:36 [INFO]   Breakdown: fwd_bwd 2.34s | clip 1.14s | optim 5.58s
+18:28:36 [INFO]   GPU: 148.56GB (alloc 29.98GB / reserved 192.17GB)
+18:28:36 [INFO]   CPU: 126.44GB
+18:28:36 [INFO]   Grad norm: 7.1562
+18:28:45 [INFO] Step 3/5 | Loss 0.1606 | Avg 0.3294
+18:28:45 [INFO]   Time: 9.33s | Tokens/s 209.1 | GFLOPS 18526.1
+18:28:45 [INFO]   FWD: 0.77s | BWD: 1.59s
+18:28:45 [INFO]   Breakdown: fwd_bwd 2.36s | clip 1.14s | optim 5.83s
+18:28:45 [INFO]   GPU: 149.07GB (alloc 29.98GB / reserved 192.17GB)
+18:28:45 [INFO]   CPU: 126.54GB
+18:28:45 [INFO]   Grad norm: 3.0000
+18:28:55 [INFO] Step 4/5 | Loss 0.2065 | Avg 0.2987
+18:28:55 [INFO]   Time: 9.56s | Tokens/s 123.6 | GFLOPS 10957.5
+18:28:55 [INFO]   FWD: 0.76s | BWD: 1.57s
+18:28:55 [INFO]   Breakdown: fwd_bwd 2.33s | clip 1.14s | optim 6.09s
+18:28:55 [INFO]   GPU: 149.07GB (alloc 29.98GB / reserved 192.17GB)
+18:28:55 [INFO]   CPU: 126.43GB
+18:28:55 [INFO]   Grad norm: 3.7500
+18:29:04 [INFO] Step 5/5 | Loss 0.1436 | Avg 0.2677
+18:29:04 [INFO]   Time: 9.20s | Tokens/s 142.1 | GFLOPS 12595.4
+18:29:04 [INFO]   FWD: 0.77s | BWD: 1.57s
+18:29:04 [INFO]   Breakdown: fwd_bwd 2.34s | clip 1.14s | optim 5.73s
+18:29:04 [INFO]   GPU: 149.07GB (alloc 29.98GB / reserved 192.17GB)
+18:29:04 [INFO]   CPU: 126.43GB
+18:29:04 [INFO]   Grad norm: 2.9219
+18:29:04 [INFO] ======================================================================
+18:29:04 [INFO] TRAINING COMPLETE
+18:29:04 [INFO] ======================================================================
+18:29:04 [INFO] Loss: 0.6297 -> 0.1436 (77.2% reduction)
+18:29:04 [INFO] Peak GPU: 149.07 GB
+18:29:04 [INFO] Peak CPU: 126.62 GB
+18:29:04 [INFO] 
+18:29:04 [INFO] Performance Metrics:
+18:29:04 [INFO]   Avg Latency: 12.930s per step
+18:29:04 [INFO]   Avg Throughput: 11892.3 GFLOPS
+18:29:04 [INFO] Timing Breakdown:
+18:29:04 [INFO]   Avg forward: 2.789s
+18:29:04 [INFO]   Avg backward: 3.027s
+18:29:04 [INFO]   Avg clip_grad_norm: 1.137s
+18:29:04 [INFO]   Avg optimizer.step: 5.976s

@@ -1,0 +1,82 @@
+{
+  "log_path": "/mnt/c/Users/ckuchina/.cursor/projects/c-Users-ckuchina-Workspace-Upstream-CI/terminals/713044.txt",
+  "header": {
+    "model": "Qwen/Qwen2.5-14B-Instruct",
+    "attention": "flash_attention_2",
+    "dataset": "metamath",
+    "batch_size": "96",
+    "training_steps": "5",
+    "learning_rate": "2e-05"
+  },
+  "steps": [
+    {
+      "step": 1,
+      "total_steps": 5,
+      "loss": 0.7311,
+      "avg_loss": 0.7311,
+      "step_time_s": 74.81,
+      "tokens_per_s": 1314.0,
+      "gflops": 116451.1,
+      "gpu_gb": 55.52,
+      "cpu_gb": 190.46
+    },
+    {
+      "step": 2,
+      "total_steps": 5,
+      "loss": 0.22,
+      "avg_loss": 0.4756,
+      "step_time_s": 19.93,
+      "tokens_per_s": 4933.0,
+      "gflops": 437160.5,
+      "gpu_gb": 55.52,
+      "cpu_gb": 190.51
+    },
+    {
+      "step": 3,
+      "total_steps": 5,
+      "loss": 0.1978,
+      "avg_loss": 0.383,
+      "step_time_s": 20.17,
+      "tokens_per_s": 4872.6,
+      "gflops": 431807.7,
+      "gpu_gb": 55.52,
+      "cpu_gb": 190.52
+    },
+    {
+      "step": 4,
+      "total_steps": 5,
+      "loss": 0.1902,
+      "avg_loss": 0.3348,
+      "step_time_s": 20.62,
+      "tokens_per_s": 4766.7,
+      "gflops": 422421.8,
+      "gpu_gb": 55.52,
+      "cpu_gb": 190.52
+    },
+    {
+      "step": 5,
+      "total_steps": 5,
+      "loss": 0.1988,
+      "avg_loss": 0.3076,
+      "step_time_s": 20.5,
+      "tokens_per_s": 4794.4,
+      "gflops": 424880.3,
+      "gpu_gb": 55.52,
+      "cpu_gb": 190.54
+    }
+  ],
+  "summary": {
+    "initial_loss": 0.7311,
+    "final_loss": 0.1988,
+    "loss_reduction_pct": 72.8,
+    "peak_gpu_gb": 55.52,
+    "peak_cpu_gb": 190.54,
+    "avg_latency_s": 31.208,
+    "avg_gflops": 366544.3,
+    "steady_state_avg_gflops": 429067.575,
+    "steady_state_avg_tokens_per_s": 4841.675,
+    "steady_state_avg_step_time_s": 20.305,
+    "steady_state_peak_gpu_gb": 55.52,
+    "steady_state_peak_cpu_gb": 190.54
+  }
+}

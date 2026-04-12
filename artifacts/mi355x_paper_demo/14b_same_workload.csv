@@ -1,0 +1,4 @@
+method,status,batch_size,steady_tflops,steady_tokens_per_s,peak_gpu_gb,peak_cpu_gb
+MegaTrain,success,16,109.38427499999999,1234.3,16.78,190.47
+ZeRO-3 + CPU offload,success,16,37.36012392373297,421.5757026877256,214.0747675895691,344.09004974365234
+PyTorch Native,oom,16,,,214.25896835327148,5.938121795654297

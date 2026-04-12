@@ -1,0 +1,46 @@
+# Qwen 2.5 14B single-accelerator batch-scaling config on MetaMathQA.
+#
+# This config is the normalized base for the MI355X batch sweep so all methods
+# share the same split policy, sequence length, precision, and no-eval short-run
+# throughput setup.
+
+model:
+  name: "Qwen/Qwen2.5-14B-Instruct"
+  dtype: "bfloat16"
+  device: 0
+  trust_remote_code: true
+
+dataset:
+  name: "metamath"
+  dataset_dir: "data"
+  max_seq_len: 1024
+  num_workers: 2
+  train_ratio: 0.7
+  eval_ratio: 0.3
+  split_seed: 42
+
+training:
+  batch_size: 16
+  gradient_accumulation_steps: 1
+  num_steps: 5
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  seed: 42
+
+optimizer:
+  type: "deepspeed_adam"
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1.0e-8
+
+memory:
+  checkpoint_interval: 4
+  num_grad_slabs: 12
+
+logging:
+  log_interval: 1
+  enable_timing: true
+
+evaluation:
+  enabled: false
