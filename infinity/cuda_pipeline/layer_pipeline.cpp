@@ -1,15 +1,14 @@
 #include <torch/extension.h>
-#include <ATen/cuda/CUDAContext.h>
-#include <c10/cuda/CUDAStream.h>
+#include "../../csrc/gpu_compat.h"
 #include <vector>
 
 // Async copy parameters from CPU to GPU buffer
 void async_copy_params(
     const std::vector<torch::Tensor>& cpu_params,
     const std::vector<torch::Tensor>& gpu_params,
-    c10::cuda::CUDAStream stream
+    infinity_gpu_compat::Stream stream
 ) {
-    c10::cuda::CUDAStreamGuard guard(stream);
+    infinity_gpu_compat::StreamGuard guard(stream);
     for (size_t i = 0; i < cpu_params.size(); ++i) {
         gpu_params[i].copy_(cpu_params[i], /*non_blocking=*/true);
     }
@@ -19,9 +18,9 @@ void async_copy_params(
 void async_copy_grads(
     const std::vector<torch::Tensor>& gpu_params,
     const std::vector<torch::Tensor>& cpu_params,
-    c10::cuda::CUDAStream stream
+    infinity_gpu_compat::Stream stream
 ) {
-    c10::cuda::CUDAStreamGuard guard(stream);
+    infinity_gpu_compat::StreamGuard guard(stream);
     for (size_t i = 0; i < gpu_params.size(); ++i) {
         if (gpu_params[i].grad().defined()) {
             if (!cpu_params[i].grad().defined()) {
@@ -45,8 +44,8 @@ torch::Tensor pipeline_forward(
     int64_t checkpoint_interval,
     std::vector<torch::Tensor>& checkpoints
 ) {
-    auto compute_stream = c10::cuda::getCurrentCUDAStream();
-    auto weight_stream = c10::cuda::getStreamFromPool(false, hidden.device().index());
+    auto compute_stream = infinity_gpu_compat::get_current_stream();
+    auto weight_stream = infinity_gpu_compat::get_stream_from_pool(false, hidden.device().index());
 
     int num_layers = cpu_layers_params.size();
 

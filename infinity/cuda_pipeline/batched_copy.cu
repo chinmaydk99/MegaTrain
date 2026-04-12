@@ -1,6 +1,5 @@
 #include <torch/extension.h>
-#include <c10/cuda/CUDAStream.h>
-#include <cuda_runtime.h>
+#include "../../csrc/gpu_compat.h"
 #include <vector>
 
 // CUDA kernel for batched parameter copying
@@ -28,7 +27,7 @@ __global__ void batched_copy_kernel(
 void batched_copy_tensors(
     const std::vector<torch::Tensor>& src_tensors,
     const std::vector<torch::Tensor>& dst_tensors,
-    cudaStream_t stream
+    gpuStream_t stream
 ) {
     int num_tensors = src_tensors.size();
 
@@ -48,13 +47,16 @@ void batched_copy_tensors(
     const float** d_src_ptrs;
     int64_t* d_sizes;
 
-    cudaMalloc(&d_dst_ptrs, num_tensors * sizeof(float*));
-    cudaMalloc(&d_src_ptrs, num_tensors * sizeof(const float*));
-    cudaMalloc(&d_sizes, num_tensors * sizeof(int64_t));
+    GPU_CHECK(GPU_MALLOC(&d_dst_ptrs, num_tensors * sizeof(float*)));
+    GPU_CHECK(GPU_MALLOC(&d_src_ptrs, num_tensors * sizeof(const float*)));
+    GPU_CHECK(GPU_MALLOC(&d_sizes, num_tensors * sizeof(int64_t)));
 
-    cudaMemcpyAsync(d_dst_ptrs, h_dst_ptrs.data(), num_tensors * sizeof(float*), cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync(d_src_ptrs, h_src_ptrs.data(), num_tensors * sizeof(const float*), cudaMemcpyHostToDevice, stream);
-    cudaMemcpyAsync(d_sizes, h_sizes.data(), num_tensors * sizeof(int64_t), cudaMemcpyHostToDevice, stream);
+    GPU_CHECK(GPU_MEMCPY_ASYNC(
+        d_dst_ptrs, h_dst_ptrs.data(), num_tensors * sizeof(float*), GPU_MEMCPY_H2D, stream));
+    GPU_CHECK(GPU_MEMCPY_ASYNC(
+        d_src_ptrs, h_src_ptrs.data(), num_tensors * sizeof(const float*), GPU_MEMCPY_H2D, stream));
+    GPU_CHECK(GPU_MEMCPY_ASYNC(
+        d_sizes, h_sizes.data(), num_tensors * sizeof(int64_t), GPU_MEMCPY_H2D, stream));
 
     // Launch kernel
     dim3 block(256);
@@ -65,9 +67,9 @@ void batched_copy_tensors(
     );
 
     // Cleanup
-    cudaFree(d_dst_ptrs);
-    cudaFree(d_src_ptrs);
-    cudaFree(d_sizes);
+    GPU_CHECK(GPU_FREE(d_dst_ptrs));
+    GPU_CHECK(GPU_FREE(d_src_ptrs));
+    GPU_CHECK(GPU_FREE(d_sizes));
 }
 
 // Wrapper for PyTorch
@@ -76,7 +78,8 @@ void batched_copy_params(
     const std::vector<torch::Tensor>& dst_tensors
 ) {
     // Get current CUDA stream using new API
-    cudaStream_t stream = c10::cuda::getCurrentCUDAStream().stream();
+    auto current_stream = infinity_gpu_compat::get_current_stream();
+    gpuStream_t stream = infinity_gpu_compat::raw_stream(current_stream);
     batched_copy_tensors(src_tensors, dst_tensors, stream);
 }
 
@@ -85,7 +88,7 @@ void batched_copy_params(
 void async_accumulate_grads(
     const std::vector<torch::Tensor>& gpu_params,
     const std::vector<torch::Tensor>& cpu_params,
-    cudaStream_t stream
+    gpuStream_t stream
 ) {
     for (size_t i = 0; i < gpu_params.size(); ++i) {
         if (gpu_params[i].grad().defined()) {
@@ -113,7 +116,8 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
           [](const std::vector<torch::Tensor>& gpu_params,
              const std::vector<torch::Tensor>& cpu_params) {
               // Get current CUDA stream using new API
-              cudaStream_t stream = c10::cuda::getCurrentCUDAStream().stream();
+              auto current_stream = infinity_gpu_compat::get_current_stream();
+              gpuStream_t stream = infinity_gpu_compat::raw_stream(current_stream);
               async_accumulate_grads(gpu_params, cpu_params, stream);
           },
           "Async gradient accumulation");

@@ -1,12 +1,8 @@
 // PyTorch C++/CUDA extension for memory management primitives
 #include <torch/extension.h>
-#include <ATen/cuda/CUDAContext.h>
-#include <c10/cuda/CUDAStream.h>
-#include <cuda_runtime.h>
+#include "gpu_compat.h"
 #include <vector>
 #include <mutex>
-
-#define CHECK_CUDA(x) TORCH_CHECK(x == cudaSuccess, "CUDA error: ", cudaGetErrorString(x))
 
 // ============================================================================
 // Pinned Memory Buffer Pool
@@ -20,14 +16,17 @@ public:
         free_list_.reserve(num_buffers);
 
         for (size_t i = 0; i < num_buffers; i++) {
-            CHECK_CUDA(cudaMallocHost(&buffers_[i], buffer_size));
+            GPU_CHECK(GPU_MALLOC_HOST(&buffers_[i], buffer_size));
             free_list_.push_back(i);
         }
     }
 
     ~PinnedBufferPool() {
         for (auto ptr : buffers_) {
-            if (ptr) cudaFreeHost(ptr);
+            if (ptr) {
+                auto status = GPU_FREE_HOST(ptr);
+                (void)status;
+            }
         }
     }
 
@@ -104,12 +103,12 @@ void memcpy_h2d_async(
     void* src = g_pool->get_ptr(pool_idx);
     TORCH_CHECK(src, "Invalid pool index");
 
-    cudaStream_t stream = reinterpret_cast<cudaStream_t>(stream_ptr);
-    CHECK_CUDA(cudaMemcpyAsync(
+    gpuStream_t stream = reinterpret_cast<gpuStream_t>(stream_ptr);
+    GPU_CHECK(GPU_MEMCPY_ASYNC(
         dst.data_ptr(),
         src,
         num_bytes,
-        cudaMemcpyHostToDevice,
+        GPU_MEMCPY_H2D,
         stream
     ));
 }
@@ -126,12 +125,12 @@ void memcpy_d2h_async(
     void* dst = g_pool->get_ptr(pool_idx);
     TORCH_CHECK(dst, "Invalid pool index");
 
-    cudaStream_t stream = reinterpret_cast<cudaStream_t>(stream_ptr);
-    CHECK_CUDA(cudaMemcpyAsync(
+    gpuStream_t stream = reinterpret_cast<gpuStream_t>(stream_ptr);
+    GPU_CHECK(GPU_MEMCPY_ASYNC(
         dst,
         src.data_ptr(),
         num_bytes,
-        cudaMemcpyDeviceToHost,
+        GPU_MEMCPY_D2H,
         stream
     ));
 }
@@ -151,47 +150,47 @@ torch::Tensor pool_to_tensor(int64_t pool_idx, std::vector<int64_t> shape, torch
 // ============================================================================
 
 int64_t event_create() {
-    cudaEvent_t event;
-    CHECK_CUDA(cudaEventCreate(&event));
+    gpuEvent_t event;
+    GPU_CHECK(GPU_EVENT_CREATE(&event));
     return reinterpret_cast<int64_t>(event);
 }
 
 void event_destroy(int64_t event_ptr) {
-    cudaEvent_t event = reinterpret_cast<cudaEvent_t>(event_ptr);
-    CHECK_CUDA(cudaEventDestroy(event));
+    gpuEvent_t event = reinterpret_cast<gpuEvent_t>(event_ptr);
+    GPU_CHECK(GPU_EVENT_DESTROY(event));
 }
 
 void event_record(int64_t event_ptr, int64_t stream_ptr) {
-    cudaEvent_t event = reinterpret_cast<cudaEvent_t>(event_ptr);
-    cudaStream_t stream = reinterpret_cast<cudaStream_t>(stream_ptr);
-    CHECK_CUDA(cudaEventRecord(event, stream));
+    gpuEvent_t event = reinterpret_cast<gpuEvent_t>(event_ptr);
+    gpuStream_t stream = reinterpret_cast<gpuStream_t>(stream_ptr);
+    GPU_CHECK(GPU_EVENT_RECORD(event, stream));
 }
 
 bool event_query(int64_t event_ptr) {
-    cudaEvent_t event = reinterpret_cast<cudaEvent_t>(event_ptr);
-    cudaError_t status = cudaEventQuery(event);
-    if (status == cudaSuccess) return true;
-    if (status == cudaErrorNotReady) return false;
-    CHECK_CUDA(status);
+    gpuEvent_t event = reinterpret_cast<gpuEvent_t>(event_ptr);
+    gpuError_t status = GPU_EVENT_QUERY(event);
+    if (status == GPU_SUCCESS) return true;
+    if (status == GPU_ERROR_NOT_READY) return false;
+    GPU_CHECK(status);
     return false;
 }
 
 void event_synchronize(int64_t event_ptr) {
-    cudaEvent_t event = reinterpret_cast<cudaEvent_t>(event_ptr);
-    CHECK_CUDA(cudaEventSynchronize(event));
+    gpuEvent_t event = reinterpret_cast<gpuEvent_t>(event_ptr);
+    GPU_CHECK(GPU_EVENT_SYNCHRONIZE(event));
 }
 
 void stream_wait_event(int64_t stream_ptr, int64_t event_ptr) {
-    cudaStream_t stream = reinterpret_cast<cudaStream_t>(stream_ptr);
-    cudaEvent_t event = reinterpret_cast<cudaEvent_t>(event_ptr);
-    CHECK_CUDA(cudaStreamWaitEvent(stream, event, 0));
+    gpuStream_t stream = reinterpret_cast<gpuStream_t>(stream_ptr);
+    gpuEvent_t event = reinterpret_cast<gpuEvent_t>(event_ptr);
+    GPU_CHECK(GPU_STREAM_WAIT_EVENT(stream, event, 0));
 }
 
 float event_elapsed_time(int64_t start_ptr, int64_t end_ptr) {
-    cudaEvent_t start = reinterpret_cast<cudaEvent_t>(start_ptr);
-    cudaEvent_t end = reinterpret_cast<cudaEvent_t>(end_ptr);
+    gpuEvent_t start = reinterpret_cast<gpuEvent_t>(start_ptr);
+    gpuEvent_t end = reinterpret_cast<gpuEvent_t>(end_ptr);
     float ms;
-    CHECK_CUDA(cudaEventElapsedTime(&ms, start, end));
+    GPU_CHECK(GPU_EVENT_ELAPSED_TIME(&ms, start, end));
     return ms;
 }
 
@@ -200,8 +199,8 @@ float event_elapsed_time(int64_t start_ptr, int64_t end_ptr) {
 // ============================================================================
 
 int64_t get_current_stream_ptr() {
-    cudaStream_t stream = c10::cuda::getCurrentCUDAStream().stream();
-    return reinterpret_cast<int64_t>(stream);
+    auto stream = infinity_gpu_compat::get_current_stream();
+    return reinterpret_cast<int64_t>(infinity_gpu_compat::raw_stream(stream));
 }
 
 // ============================================================================

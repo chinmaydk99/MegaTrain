@@ -1,6 +1,5 @@
 #include <torch/extension.h>
-#include <c10/cuda/CUDAStream.h>
-#include <cuda_runtime.h>
+#include "../../csrc/gpu_compat.h"
 
 // Template-based batched copy supporting multiple dtypes
 void batched_copy_params(
@@ -8,7 +7,7 @@ void batched_copy_params(
     const std::vector<torch::Tensor>& dst_tensors
 ) {
     // Get current CUDA stream
-    auto stream = c10::cuda::getCurrentCUDAStream();
+    auto stream = infinity_gpu_compat::get_current_stream();
 
     // Batch copy all tensors with non_blocking=true
     // PyTorch's copy_ handles dtype conversion automatically
