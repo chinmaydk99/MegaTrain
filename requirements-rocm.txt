@@ -1,0 +1,15 @@
+# Validated ROCm-side extras for the AMD bring-up branch.
+#
+# Important:
+# - This file is consumed by `scripts/install_rocm.sh`.
+# - It assumes a ROCm-enabled PyTorch is already installed in the environment.
+# - `causal-conv1d` is installed separately with ROCm-safe flags.
+# - `torchvision` is intentionally excluded from the default path because the
+#   generic PyPI wheel can try to replace ROCm PyTorch with CUDA packages.
+
+accelerate==1.13.0
+deepspeed==0.18.9
+flash-attn==2.8.3
+flash-linear-attention==0.4.2
+kernels==0.13.0
+ninja>=1.11.0

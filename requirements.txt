@@ -1,3 +1,6 @@
+# Base cross-backend dependencies.
+# For the MI355X / ROCm showcase environment, install `requirements-rocm.txt` as well.
+
 # Core
 torch>=2.0.0
 transformers>=5.0.0

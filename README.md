@@ -31,15 +31,15 @@
 ## Quick Start
 
 ```bash
-# Install
+# Install the validated ROCm stack (expects ROCm PyTorch to already be installed)
 git clone https://github.com/DLYuanGod/MegaTrain.git
 cd MegaTrain
-pip install -e .
+bash scripts/install_rocm.sh
 
-# Train with built-in demo data
-python examples/train.py --config examples/configs/llama3_8b.yaml
+# Run the validated 7B smoke test
+python examples/train.py --config examples/configs/qwen_7b_rocm_paper.yaml --num-steps 5 --eval-num-samples 8
 
-# Train any supported model
+# Train a larger supported model
 python examples/train.py --config examples/configs/qwen3_5_27b.yaml
 ```
 
@@ -175,13 +175,18 @@ See [`examples/configs/`](examples/configs/) for ready-made configurations.
 ```bash
 git clone https://github.com/DLYuanGod/MegaTrain.git
 cd MegaTrain
-pip install -e .
-
-# Optional: faster attention & optimizer
-pip install flash-attn
-pip install flash-linear-attention causal-conv1d  # for Qwen3.5 linear attention
-pip install deepspeed                              # for CPUAdam optimizer
+bash scripts/install_rocm.sh
 ```
+
+`scripts/install_rocm.sh` is the repo-owned ROCm bootstrap for this branch. It:
+
+- verifies that the current `torch` build is ROCm-enabled
+- installs MegaTrain in editable mode
+- installs the validated ROCm extras recorded in `requirements-rocm.txt`
+- builds `causal-conv1d` with the ROCm-safe flags that were required in the fresh-container validation
+- verifies the fast-path imports for flash CE, DeepSpeed CPUAdam, flash-linear-attention, and `causal_conv1d`
+
+For the exact AMD-side package notes, smoke-test command, and `torchvision` caveat, see `ROCM_ENVIRONMENT.md`.
 
 ## Troubleshooting
 
