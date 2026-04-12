@@ -1,7 +1,42 @@
 """Training configuration for CPU Master model."""
 
 from dataclasses import dataclass, field
+import importlib.util
+
 import torch
+
+from infinity.device import get_backend
+
+
+def _module_exists(module_name: str) -> bool:
+    """Return True when an importable module is available."""
+    try:
+        return importlib.util.find_spec(module_name) is not None
+    except ModuleNotFoundError:
+        return False
+
+
+def flash_attn_available() -> bool:
+    """Whether the flash-attn package is installed."""
+    return _module_exists("flash_attn")
+
+
+def deepspeed_cpu_adam_available() -> bool:
+    """Whether DeepSpeed CPUAdam is importable."""
+    return _module_exists("deepspeed.ops.adam")
+
+
+def flash_linear_attention_available() -> bool:
+    """Whether flash-linear-attention is importable."""
+    return _module_exists("fla") or _module_exists("flash_linear_attention")
+
+
+def default_attn_implementation() -> str:
+    """Choose the safest default attention implementation for this backend."""
+    backend = get_backend()
+    if backend.is_rocm and not flash_attn_available():
+        return "sdpa"
+    return "flash_attention_2"
 
 
 @dataclass
@@ -41,7 +76,7 @@ class CPUMasterConfig:
     model_name: str = "Qwen/Qwen2.5-32B-Instruct"
     device: int = 0
     dtype: torch.dtype = torch.bfloat16
-    attn_implementation: str = "flash_attention_2"
+    attn_implementation: str = field(default_factory=default_attn_implementation)
     trust_remote_code: bool = True
 
     # Dataset
@@ -49,6 +84,9 @@ class CPUMasterConfig:
     dataset_name: str = ""
     dataset_dir: str = "data"
     max_seq_len: int = 1024
+    split_seed: int = 42
+    train_ratio: float = 1.0
+    eval_ratio: float = 0.0
     system_prompt: str = ""
     query_field: str = "query"
     response_field: str = "response"
@@ -80,6 +118,12 @@ class CPUMasterConfig:
     log_interval: int = 1
     enable_timing: bool = True
 
+    # Evaluation
+    eval_enabled: bool = False
+    eval_batch_size: int = 4
+    eval_max_new_tokens: int = 128
+    eval_num_samples: int = 0
+
     def __post_init__(self):
         """Validate configuration after initialization."""
         if self.num_grad_slabs < 2 * self.checkpoint_interval:
@@ -98,3 +142,19 @@ class CPUMasterConfig:
                 f"attn_implementation must be one of {valid_attn}, "
                 f"got '{self.attn_implementation}'"
             )
+
+        for name, ratio in (("train_ratio", self.train_ratio), ("eval_ratio", self.eval_ratio)):
+            if not 0.0 <= ratio <= 1.0:
+                raise ValueError(f"{name} must be between 0 and 1, got {ratio}")
+        if self.train_ratio + self.eval_ratio > 1.0 + 1e-8:
+            raise ValueError(
+                f"train_ratio + eval_ratio must be <= 1, got {self.train_ratio + self.eval_ratio}"
+            )
+        if self.eval_enabled and self.eval_ratio <= 0.0:
+            raise ValueError("eval_enabled=True requires eval_ratio > 0")
+        if self.eval_batch_size < 1:
+            raise ValueError("eval_batch_size must be >= 1")
+        if self.eval_max_new_tokens < 1:
+            raise ValueError("eval_max_new_tokens must be >= 1")
+        if self.eval_num_samples < 0:
+            raise ValueError("eval_num_samples must be >= 0")

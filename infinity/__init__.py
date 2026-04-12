@@ -10,13 +10,16 @@ Supports any HuggingFace decoder-only model and VLM:
 from .model.cpu_master import CPUMasterModel
 from .config.training import CPUMasterConfig
 from .data.datasets import ChatDataset, MetaMathDataset, collate_fn
+from .device import BACKEND, get_backend
 
 __version__ = "0.3.0"
 
 __all__ = [
+    "BACKEND",
     "CPUMasterModel",
     "CPUMasterConfig",
     "ChatDataset",
     "MetaMathDataset",
     "collate_fn",
+    "get_backend",
 ]

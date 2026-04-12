@@ -10,10 +10,12 @@ except ImportError:
     HAS_CUDA_EXT = False
     _C = None
 
+HAS_GPU_EXT = HAS_CUDA_EXT
+
 
 def _check_ext():
-    if not HAS_CUDA_EXT:
-        raise RuntimeError("CUDA extension not built. Run: cd csrc && pip install .")
+    if not HAS_GPU_EXT:
+        raise RuntimeError("GPU extension not built. Run: cd csrc && pip install .")
 
 
 def _get_stream_ptr(stream: Optional[torch.cuda.Stream] = None) -> int:

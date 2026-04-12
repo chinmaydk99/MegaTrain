@@ -1,16 +1,16 @@
 #!/bin/bash
 
-# Build script for CUDA pipeline extension
+# Build script for GPU pipeline extension
 
 set -e
 
-echo "Building CUDA pipeline extension..."
+echo "Building GPU pipeline extension..."
 
 cd "$(dirname "$0")"
 
 # Check PyTorch installation
-python -c "import torch; assert torch.cuda.is_available(), 'CUDA not available in PyTorch'" || {
-    echo "ERROR: PyTorch with CUDA support is required."
+python -c "import torch; assert torch.cuda.is_available(), 'GPU backend not available in PyTorch'" || {
+    echo "ERROR: PyTorch with GPU support is required."
     exit 1
 }
 
@@ -27,22 +27,44 @@ if [ "$BUILD_MODE" = "simple" ]; then
     echo "This version is more compatible but may be slightly slower."
     echo ""
     python setup.py build_ext --inplace --simple
-elif [ "$BUILD_MODE" = "cuda" ]; then
-    # Check if CUDA is available
-    if ! command -v nvcc &> /dev/null; then
-        echo "ERROR: nvcc not found. Please install CUDA toolkit or use 'simple' mode."
-        echo "Usage: $0 [simple|cuda]"
+elif [ "$BUILD_MODE" = "cuda" ] || [ "$BUILD_MODE" = "rocm" ] || [ "$BUILD_MODE" = "gpu" ]; then
+    BACKEND=$(python - <<'PY'
+import torch
+if getattr(torch.version, "hip", None):
+    print("rocm")
+elif getattr(torch.version, "cuda", None) and torch.cuda.is_available():
+    print("cuda")
+else:
+    print("none")
+PY
+)
+
+    if [ "$BACKEND" = "cuda" ] && ! command -v nvcc &> /dev/null; then
+        echo "ERROR: nvcc not found. Please install the CUDA toolkit or use 'simple' mode."
         exit 1
     fi
+
+    if [ "$BACKEND" = "rocm" ] && ! command -v hipcc &> /dev/null; then
+        echo "ERROR: hipcc not found. Please install ROCm or use 'simple' mode."
+        exit 1
+    fi
+
+    if [ "$BACKEND" = "none" ]; then
+        echo "ERROR: No CUDA or ROCm backend detected in PyTorch."
+        exit 1
+    fi
+
     echo ""
-    echo "Building CUDA version (with custom CUDA kernels)..."
+    echo "Building full ${BACKEND^^} version (with custom GPU kernels)..."
     echo "This version has custom kernels for maximum performance."
     echo ""
     python setup.py build_ext --inplace
 else
-    echo "Usage: $0 [simple|cuda]"
+    echo "Usage: $0 [simple|gpu|cuda|rocm]"
     echo "  simple - Build C++ version (default, more compatible)"
-    echo "  cuda   - Build CUDA version (requires nvcc, maximum performance)"
+    echo "  gpu    - Auto-detect CUDA or ROCm and build the GPU version"
+    echo "  cuda   - Alias for gpu mode when CUDA is installed"
+    echo "  rocm   - Alias for gpu mode when ROCm is installed"
     exit 1
 fi
 

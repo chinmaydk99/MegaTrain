@@ -13,35 +13,62 @@ long_description = readme_file.read_text(encoding="utf-8") if readme_file.exists
 ext_modules = []
 cmdclass = {}
 
+
+def detect_gpu_backend(torch_module) -> str | None:
+    """Detect which GPU backend this PyTorch build targets."""
+    if getattr(torch_module.version, "hip", None):
+        return "rocm"
+    if getattr(torch_module.version, "cuda", None) and torch_module.cuda.is_available():
+        return "cuda"
+    return None
+
+
+def extension_compile_args(backend: str) -> dict[str, list[str]]:
+    """Return compile args for CUDA/ROCm extensions."""
+    cxx_args = ["-O3", "-std=c++17"]
+    gpu_args = ["-O3"]
+
+    if backend == "cuda":
+        gpu_args.append("--use_fast_math")
+    elif backend == "rocm":
+        cxx_args.append("-DUSE_ROCM")
+        gpu_args.extend(["-DUSE_ROCM", "-D__HIP_PLATFORM_AMD__"])
+
+    return {"cxx": cxx_args, "nvcc": gpu_args}
+
 try:
     import torch
-    from torch.utils.cpp_extension import BuildExtension, CUDAExtension
-    
-    # Check if CUDA is available
-    if torch.cuda.is_available():
-        print("CUDA detected! Building CUDA pipeline extension...")
-        
-        # CUDA extension for optimized operations
-        cuda_ext = CUDAExtension(
-            name='cuda_pipeline',
-            sources=['infinity/cuda_pipeline/batched_copy.cu'],
-            extra_compile_args={
-                'cxx': ['-O3', '-std=c++17'],
-                'nvcc': [
-                    '-O3',
-                    '--use_fast_math',
-                ]
-            }
+    from torch.utils.cpp_extension import BuildExtension, CUDAExtension, CUDA_HOME, ROCM_HOME
+
+    backend = detect_gpu_backend(torch)
+    toolchain_home = ROCM_HOME if backend == "rocm" else CUDA_HOME
+
+    if backend and toolchain_home:
+        print(f"{backend.upper()} detected! Building GPU extensions...")
+        compile_args = extension_compile_args(backend)
+
+        ext_modules.extend(
+            [
+                CUDAExtension(
+                    name="cuda_pipeline",
+                    sources=["infinity/cuda_pipeline/batched_copy.cu"],
+                    extra_compile_args=compile_args,
+                ),
+                CUDAExtension(
+                    name="infinity_memory_ops",
+                    sources=["csrc/memory_ops.cpp"],
+                    extra_compile_args=compile_args,
+                ),
+            ]
         )
-        ext_modules.append(cuda_ext)
         cmdclass['build_ext'] = BuildExtension
-        print("✓ CUDA extension will be built")
+        print("✓ GPU extensions will be built")
     else:
-        print("CUDA not available, skipping CUDA extension")
+        print("GPU toolchain not available, skipping native GPU extensions")
         
 except ImportError:
-    print("PyTorch not installed yet, skipping CUDA extension")
-    print("You can install CUDA extension later by running: pip install -e .")
+    print("PyTorch not installed yet, skipping native GPU extensions")
+    print("You can install GPU extensions later by running: pip install -e .")
 
 setup(
     name="megatrain",

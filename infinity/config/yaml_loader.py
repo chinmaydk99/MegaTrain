@@ -4,7 +4,7 @@ import yaml
 import torch
 from pathlib import Path
 from typing import Dict, Any, Optional
-from infinity.config.training import CPUMasterConfig
+from infinity.config.training import CPUMasterConfig, default_attn_implementation
 
 
 def load_yaml_config(config_path: str) -> Dict[str, Any]:
@@ -42,6 +42,7 @@ def yaml_to_training_config(yaml_config: Dict[str, Any]) -> CPUMasterConfig:
     optimizer_cfg = yaml_config.get('optimizer', {})
     memory_cfg = yaml_config.get('memory', {})
     logging_cfg = yaml_config.get('logging', {})
+    evaluation_cfg = yaml_config.get('evaluation', {})
 
     # Convert dtype string to torch.dtype
     dtype_str = model_cfg.get('dtype', 'bfloat16')
@@ -58,7 +59,7 @@ def yaml_to_training_config(yaml_config: Dict[str, Any]) -> CPUMasterConfig:
         model_name=model_cfg.get('name', 'Qwen/Qwen2.5-32B-Instruct'),
         device=model_cfg.get('device', 0),
         dtype=dtype,
-        attn_implementation=model_cfg.get('attn_implementation', 'flash_attention_2'),
+        attn_implementation=model_cfg.get('attn_implementation', default_attn_implementation()),
         trust_remote_code=model_cfg.get('trust_remote_code', True),
 
         # Dataset
@@ -66,6 +67,9 @@ def yaml_to_training_config(yaml_config: Dict[str, Any]) -> CPUMasterConfig:
         dataset_name=dataset_cfg.get('name', ''),
         dataset_dir=dataset_cfg.get('dataset_dir', 'data'),
         max_seq_len=dataset_cfg.get('max_seq_len', 1024),
+        split_seed=dataset_cfg.get('split_seed', 42),
+        train_ratio=dataset_cfg.get('train_ratio', 1.0),
+        eval_ratio=dataset_cfg.get('eval_ratio', 0.0),
         system_prompt=dataset_cfg.get('system_prompt', ''),
         query_field=dataset_cfg.get('query_field', 'query'),
         response_field=dataset_cfg.get('response_field', 'response'),
@@ -96,6 +100,12 @@ def yaml_to_training_config(yaml_config: Dict[str, Any]) -> CPUMasterConfig:
         # Logging
         log_interval=logging_cfg.get('log_interval', 1),
         enable_timing=logging_cfg.get('enable_timing', True),
+
+        # Evaluation
+        eval_enabled=evaluation_cfg.get('enabled', False),
+        eval_batch_size=evaluation_cfg.get('batch_size', 4),
+        eval_max_new_tokens=evaluation_cfg.get('max_new_tokens', 128),
+        eval_num_samples=evaluation_cfg.get('num_samples', 0),
     )
 
     return config
