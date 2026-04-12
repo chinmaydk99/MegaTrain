@@ -1,0 +1,38 @@
+# GPT-OSS 120B stretch probe on AMD Instinct MI355X
+# This is a size-frontier smoke test, not an apples-to-apples dense showcase.
+
+model:
+  name: "openai/gpt-oss-120b"
+  dtype: "bfloat16"
+  device: 0
+  attn_implementation: "flash_attention_2"
+  trust_remote_code: true
+
+dataset:
+  name: "alpaca_en_demo"
+  dataset_dir: "data"
+  max_seq_len: 1024
+  num_workers: 2
+
+training:
+  batch_size: 64
+  gradient_accumulation_steps: 1
+  num_steps: 2
+  learning_rate: 5.0e-6
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  seed: 42
+
+optimizer:
+  type: "deepspeed_adam"
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1.0e-8
+
+memory:
+  checkpoint_interval: 4
+  num_grad_slabs: 12
+
+logging:
+  log_interval: 1
+  enable_timing: true

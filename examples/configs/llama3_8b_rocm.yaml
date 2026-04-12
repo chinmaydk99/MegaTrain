@@ -1,0 +1,36 @@
+# Llama 3.1 8B ROCm-safe configuration
+
+model:
+  name: "meta-llama/Llama-3.1-8B-Instruct"
+  dtype: "bfloat16"
+  device: 0
+  trust_remote_code: false
+
+dataset:
+  name: "alpaca_en_demo"
+  dataset_dir: "data"
+  max_seq_len: 1024
+  num_workers: 2
+
+training:
+  batch_size: 8
+  gradient_accumulation_steps: 1
+  num_steps: 100
+  learning_rate: 2.0e-5
+  weight_decay: 0.01
+  max_grad_norm: 1.0
+  seed: 42
+
+optimizer:
+  type: "adamw"
+  beta1: 0.9
+  beta2: 0.999
+  eps: 1.0e-8
+
+memory:
+  checkpoint_interval: 4
+  num_grad_slabs: 12
+
+logging:
+  log_interval: 1
+  enable_timing: true
