@@ -103,9 +103,10 @@ class AdamWOptimizer:
             m_hat = p.m / bias_correction1
             v_hat = p.v / bias_correction2
 
-            # Compute update
+            # Compute update. Bias correction is already applied in m_hat/v_hat,
+            # so the step size stays at the configured learning rate.
             denom = v_hat.sqrt().add_(self.eps)
-            step_size = self.lr / bias_correction1  # Additional correction for step size
+            step_size = self.lr
 
             # AdamW: decoupled weight decay
             p.master.mul_(1 - self.lr * self.weight_decay)
