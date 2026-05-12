@@ -1,240 +1,278 @@
-<div align="center">
+# MegaTrain on AMD ROCm / MI355X
 
-# MegaTrain
-
-### Full Precision Training of 100B+ Parameter LLMs on a Single GPU
-
+Full-parameter LLM training past the HBM fit boundary, validated on a single AMD MI355X accelerator.
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv%202604.05091-red)](https://arxiv.org/abs/2604.05091)
-[![GitHub Stars](https://img.shields.io/github/stars/DLYuanGod/MegaTrain?style=social)](https://github.com/DLYuanGod/MegaTrain/stargazers)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/Python-3.9%2B-blue)](https://www.python.org/)
-[![PyTorch 2.0+](https://img.shields.io/badge/PyTorch-2.0%2B-orange)](https://pytorch.org/)
+[![PyTorch ROCm](https://img.shields.io/badge/PyTorch-ROCm-orange)](https://pytorch.org/)
 
-**A RAM-centric architecture that stores parameters in host memory and treats GPUs as transient compute engines, enabling full-precision training of 100B+ models on a single GPU.**
+This fork carries a ROCm-focused MegaTrain validation branch for AMD MI355X. MegaTrain stores persistent training state in host memory and treats GPU HBM as a transient compute cache. That makes it useful in the regime where native PyTorch is fast but no longer fits, and where conventional CPU offload paths such as ZeRO-3 or FSDP pay high synchronization and memory overhead.
 
-[Quick Start](#quick-start) | [Supported Models](#supported-models) | [Data Preparation](#data-preparation) | [Performance](#performance) | [Citation](#citation)
+The headline result in this branch is a paper-aligned single-accelerator study on one MI355X using `MetaMathQA`, `max_seq_len=1024`, BF16, and steady-state throughput after dropping step 1 warmup.
 
-</div>
+## What This Branch Adds
 
----
+- ROCm/HIP compatibility for MegaTrain native extension paths.
+- A repo-owned ROCm bootstrap: [`scripts/install_rocm.sh`](scripts/install_rocm.sh).
+- AMD-specific requirements in [`requirements-rocm.txt`](requirements-rocm.txt).
+- ROCm configs for Qwen 7B, 14B, 32B, 72B, and related stress runs.
+- Baseline harnesses for:
+  - `DeepSpeed ZeRO-3 + CPU offload`
+  - `PyTorch Native`
+  - `FSDP + CPU offload` probe
+- Reproducible benchmark scripts:
+  - [`scripts/run_batch_sweep.py`](scripts/run_batch_sweep.py)
+  - [`scripts/benchmark_offload_baseline.py`](scripts/benchmark_offload_baseline.py)
+  - [`scripts/parse_benchmark_log.py`](scripts/parse_benchmark_log.py)
+  - [`scripts/assemble_mi355x_paper_demo.py`](scripts/assemble_mi355x_paper_demo.py)
+- A committed MI355X artifact bundle under [`artifacts/mi355x_paper_demo/`](artifacts/mi355x_paper_demo/).
 
-## Features
+## Why This Matters
 
-- **Single GPU, Massive Models** -- Train 120B+ models on one GPU by leveraging CPU RAM for parameter storage
-- **Universal Model Support** -- Any HuggingFace decoder-only model works out of the box via `AutoModelForCausalLM`
-- **Hybrid Architecture** -- Automatic handling of mixed attention (linear + full) and MoE layers
-- **LlamaFactory-style Data** -- Flexible `dataset_info.json` registry with alpaca/sharegpt format support
-- **1.84x Faster** -- Outperforms DeepSpeed ZeRO-3 on 14B models through pipelined double-buffered execution
-- **YAML Configuration** -- Easy model/dataset/hyperparameter setup with 25+ ready-made configs
+Native PyTorch remains the right answer when the full training state fits in HBM. The interesting question is what happens after that boundary.
 
-## Quick Start
+At 14B on one MI355X:
 
-```bash
-# Install
-git clone https://github.com/DLYuanGod/MegaTrain.git
-cd MegaTrain
-pip install -e .
+- Native PyTorch is strong up to `BS=12`, then OOMs at `BS=16`.
+- ZeRO-3 CPU offload reaches `BS=20`, then OOMs at `BS=24`.
+- MegaTrain reaches `BS=256` while keeping GPU memory at `137.1 GB`.
 
-# Train with built-in demo data
-python examples/train.py --config examples/configs/llama3_8b.yaml
+So the honest claim is not "MegaTrain is fastest everywhere." The supported claim is:
 
-# Train any supported model
-python examples/train.py --config examples/configs/qwen3_5_27b.yaml
-```
+> On one MI355X, MegaTrain is the strongest validated path in this branch for full-parameter training once HBM residency becomes the limiter.
 
-## Supported Models
+## MI355X Results
 
-| Model Family | Model Sizes | Architecture |
-|:-------------|:------------|:-------------|
-| [Qwen2/Qwen2.5](https://huggingface.co/Qwen) | 0.5B/1.5B/3B/7B/14B/32B/72B | Dense |
-| [Qwen3](https://huggingface.co/Qwen) | 0.6B/1.7B/4B/8B/14B/32B | Dense |
-| [Qwen3.5](https://huggingface.co/Qwen) | 0.8B/2B/4B/9B/27B | Hybrid (linear+full attn) |
-| [Qwen3.5 MoE](https://huggingface.co/Qwen) | 35B-A3B/122B-A10B/397B-A17B | Hybrid + MoE |
-| [Qwen3-Next](https://huggingface.co/Qwen) | 80B-A3B | Hybrid + MoE |
-| [Llama 2](https://huggingface.co/meta-llama) | 7B/13B/70B | Dense |
-| [Llama 3/3.1/3.2/3.3](https://huggingface.co/meta-llama) | 1B/3B/8B/70B | Dense |
-| [Llama 4](https://huggingface.co/meta-llama) | Scout-17B-16E/Maverick | MoE |
-| [Mistral](https://huggingface.co/mistralai) | 7B | Dense |
-| [Mixtral](https://huggingface.co/mistralai) | 8x7B/8x22B | MoE |
-| [DeepSeek (LLM/Code/R1)](https://huggingface.co/deepseek-ai) | 7B/16B/67B | Dense |
-| [Phi-3/Phi-4](https://huggingface.co/microsoft) | 3.8B/14B | Dense |
-| [Gemma 2/3](https://huggingface.co/google) | 2B/7B/9B/27B | Dense |
-| [GLM-4/GLM-4.5](https://huggingface.co/THUDM) | 9B/32B | Dense |
-| [InternLM 2/2.5](https://huggingface.co/internlm) | 7B/20B | Dense |
-| [Yi 1.5](https://huggingface.co/01-ai) | 6B/9B/34B | Dense |
-| [Baichuan 2](https://huggingface.co/baichuan-inc) | 7B/13B | Dense |
-| [GPT-OSS](https://huggingface.co/openai) | 20B/120B | Dense |
-| **Vision-Language Models (VLM)** | | |
-| [Qwen2-VL/Qwen2.5-VL](https://huggingface.co/Qwen) | 2B/7B/72B | VLM (ViT + LLM) |
-| [Qwen3-VL](https://huggingface.co/Qwen) | 2B/4B/8B/32B | VLM (ViT + LLM) |
-| [Qwen3.5-VL](https://huggingface.co/Qwen) | 7B+ | VLM (ViT + Hybrid LLM) |
-| [LLaVA/LLaVA-NeXT](https://huggingface.co/llava-hf) | 7B/13B/34B | VLM |
-| [InternVL 2/2.5](https://huggingface.co/OpenGVLab) | 2B/8B/26B/76B | VLM |
-| [Gemma 3 VL](https://huggingface.co/google) | 4B/12B/27B | VLM |
-| [GLM-4V](https://huggingface.co/THUDM) | 9B | VLM |
-| [MiniCPM-V](https://huggingface.co/openbmb) | 2B/8B | VLM |
-| [Llama 4 VL](https://huggingface.co/meta-llama) | Scout/Maverick | VLM + MoE |
-| Any HF decoder-only model | Any size | Auto-detected |
-| Any HF VLM model | Any size | Auto-detected |
+All numbers below are from [`artifacts/mi355x_paper_demo/`](artifacts/mi355x_paper_demo/). The primary sweep is `Qwen2.5-14B-Instruct` on `MetaMathQA`, `max_seq_len=1024`, BF16, one MI355X.
 
-> MegaTrain uses HuggingFace's `AutoModelForCausalLM` / `AutoModelForImageTextToText` with automatic model structure discovery. Both LLM and VLM models are supported without code changes. Vision encoders are CPU-offloaded just like decoder layers — GPU only holds what's currently computing.
+### Same Workload: 14B, Batch Size 16
 
-## Data Preparation
+| Method | Status | Batch | Steady TFLOPS | Peak GPU | Peak CPU |
+| --- | --- | ---: | ---: | ---: | ---: |
+| MegaTrain | success | 16 | 109.4 | 16.8 GB | 190.5 GB |
+| ZeRO-3 + CPU offload | success | 16 | 37.4 | 214.1 GB | 344.1 GB |
+| PyTorch Native | OOM | 16 | - | 214.3 GB | 5.9 GB |
 
-MegaTrain supports a **LlamaFactory-compatible data system** with flexible format support.
+At the same `14B, BS=16` workload, MegaTrain is `2.93x` faster than ZeRO-3 CPU offload and uses `12.8x` less GPU memory.
 
-### Option 1: Dataset Registry (Recommended)
+### Validated 14B Batch Ceiling
 
-Register datasets in [`data/dataset_info.json`](data/dataset_info.json) and reference by name:
+| Method | Largest Validated Batch | Steady TFLOPS | Peak GPU | Peak CPU |
+| --- | ---: | ---: | ---: | ---: |
+| MegaTrain | 256 | 526.7 | 137.1 GB | 190.5 GB |
+| ZeRO-3 + CPU offload | 20 | 42.2 | 260.9 GB | 344.1 GB |
+| PyTorch Native | 12 | 134.3 | 223.3 GB | 5.8 GB |
+| FSDP + CPU offload | 16 probe | 23.9 | 242.0 GB | 126.7 GB |
 
-```yaml
-dataset:
-  name: "alpaca_en_demo"    # name from dataset_info.json
-  dataset_dir: "data"
-  max_seq_len: 1024
-```
+The maximum-batch comparison is not an apples-to-apples throughput claim. It shows each method's practical operating point on this node.
 
-Supports **alpaca format**, **sharegpt format**, local JSON/JSONL files, and HuggingFace Hub datasets. See [`data/README.md`](data/README.md) for details.
+### Full 14B Batch Sweep
 
-### Option 2: Direct Path (Legacy)
+| Method | Batch | Status | Steady TFLOPS | Tokens/s | Peak GPU | Peak CPU |
+| --- | ---: | --- | ---: | ---: | ---: | ---: |
+| MegaTrain | 16 | success | 109.4 | 1234.3 | 16.8 GB | 190.5 GB |
+| MegaTrain | 32 | success | 217.3 | 2451.9 | 24.1 GB | 190.5 GB |
+| MegaTrain | 64 | success | 367.8 | 4150.2 | 39.7 GB | 190.5 GB |
+| MegaTrain | 96 | success | 424.1 | 4785.4 | 55.5 GB | 190.5 GB |
+| MegaTrain | 128 | success | 466.5 | 5264.2 | 71.5 GB | 190.5 GB |
+| MegaTrain | 192 | success | 507.4 | 5725.8 | 104.3 GB | 190.5 GB |
+| MegaTrain | 256 | success | 526.7 | 5943.4 | 137.1 GB | 190.5 GB |
+| ZeRO-3 + CPU offload | 8 | success | 20.5 | 231.9 | 121.2 GB | 344.1 GB |
+| ZeRO-3 + CPU offload | 12 | success | 28.8 | 325.0 | 167.8 GB | 344.0 GB |
+| ZeRO-3 + CPU offload | 16 | success | 37.4 | 421.6 | 214.1 GB | 344.1 GB |
+| ZeRO-3 + CPU offload | 20 | success | 42.2 | 475.8 | 260.9 GB | 344.1 GB |
+| ZeRO-3 + CPU offload | 24 | OOM | - | - | - | - |
+| ZeRO-3 + CPU offload | 32 | OOM | - | - | - | - |
+| PyTorch Native | 4 | success | 111.1 | 1253.8 | 139.5 GB | 5.9 GB |
+| PyTorch Native | 8 | success | 125.8 | 1419.6 | 176.8 GB | 5.9 GB |
+| PyTorch Native | 12 | success | 134.3 | 1515.9 | 223.3 GB | 5.8 GB |
+| PyTorch Native | 16 | OOM | - | - | 214.3 GB | 5.9 GB |
 
-```yaml
-dataset:
-  path: "/path/to/arrow/dataset"
-  query_field: "query"
-  response_field: "response"
-```
+### MegaTrain Capability Ladder
 
-### Provided Datasets
+| Model | Batch | Throughput | GPU Mem | CPU Mem | Note |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Qwen2.5-7B-Instruct | 96 | 406.5 TFLOPS | 46.9 GB | 102.4 GB | average |
+| Qwen2.5-14B-Instruct | 256 | 507.2 TFLOPS | 137.1 GB | 190.6 GB | average |
+| Qwen2.5-32B-Instruct | 300 | 524.6 TFLOPS | 221.0 GB | 393.2 GB | average |
+| Qwen2.5-72B-Instruct | 200 | 556.1 TFLOPS | 215.3 GB | 855.8 GB | proof-of-life step 2 |
 
-| Dataset | Source | Format |
-|:--------|:-------|:-------|
-| [alpaca_en_demo](data/alpaca_en_demo.json) | Built-in | Alpaca |
-| [MetaMathQA](https://huggingface.co/datasets/meta-math/MetaMathQA) | HuggingFace Hub | Alpaca |
-| [Open-Platypus](https://huggingface.co/datasets/garage-bAInd/Open-Platypus) | HuggingFace Hub | Alpaca |
-| [MathInstruct](https://huggingface.co/datasets/TIGER-Lab/MathInstruct) | HuggingFace Hub | Alpaca |
-| [CodeAlpaca-20k](https://huggingface.co/datasets/sahil2801/CodeAlpaca-20k) | HuggingFace Hub | Alpaca |
-| [ShareGPT4](https://huggingface.co/datasets/shibing624/sharegpt_gpt4) | HuggingFace Hub | ShareGPT |
-| [UltraChat-200k](https://huggingface.co/datasets/HuggingFaceH4/ultrachat_200k) | HuggingFace Hub | ShareGPT |
-| [OpenThoughts-114k](https://huggingface.co/datasets/llamafactory/OpenThoughts-114k) | HuggingFace Hub | ShareGPT |
-| [OpenR1-Math-94k](https://huggingface.co/datasets/llamafactory/OpenR1-Math-94k) | HuggingFace Hub | ShareGPT |
+The 72B result is intentionally labeled proof-of-life. It is not a long-run convergence or production-throughput claim.
 
-## Configuration
+## Artifact Bundle
 
-> [!CAUTION]
-> **Do NOT guess the `batch_size`!** Use our resource calculator to find the optimal batch size for your hardware. Wrong batch size leads to OOM or wasted GPU utilization.
-> ```bash
-> python scripts/calc_resource.py
-> ```
+Start here:
 
-```yaml
-model:
-  name: "Qwen/Qwen3.5-27B"
-  dtype: "bfloat16"
-  attn_implementation: "flash_attention_2"
+- Summary: [`artifacts/mi355x_paper_demo/README.md`](artifacts/mi355x_paper_demo/README.md)
+- Machine-readable summary: [`artifacts/mi355x_paper_demo/a_first_summary.json`](artifacts/mi355x_paper_demo/a_first_summary.json)
+- Batch sweep CSV: [`artifacts/mi355x_paper_demo/14b_batch_sweep_points.csv`](artifacts/mi355x_paper_demo/14b_batch_sweep_points.csv)
+- Capability ladder CSV: [`artifacts/mi355x_paper_demo/megatrain_capability_ladder.csv`](artifacts/mi355x_paper_demo/megatrain_capability_ladder.csv)
+- Raw logs and per-run summaries: [`artifacts/mi355x_paper_demo/batch_sweep/`](artifacts/mi355x_paper_demo/batch_sweep/)
 
-dataset:
-  name: "metamath"
-  max_seq_len: 1024
+Generated charts include:
 
-training:
-  batch_size: 64       # <-- Use calc_resource.py to determine this!
-  num_steps: 500
-  learning_rate: 1.0e-5
+- `14b_same_workload_tflops.svg`
+- `14b_validated_batch_ceiling.svg`
+- `14b_batch_scaling.svg`
+- `14b_gpu_memory_vs_batch.svg`
+- `14b_cpu_memory_vs_batch.svg`
+- `megatrain_throughput_vs_model_size.svg`
 
-optimizer:
-  type: "deepspeed_adam"
-```
+## Installation On ROCm
 
-See [`examples/configs/`](examples/configs/) for ready-made configurations.
-
-| Config | Model | Architecture |
-|:-------|:------|:-------------|
-| `qwen_7b.yaml` | Qwen 2.5 7B | Dense |
-| `qwen3_8b.yaml` | Qwen 3 8B | Dense |
-| `qwen3_5_27b.yaml` | Qwen 3.5 27B | Hybrid (linear+full attn) |
-| `qwen3_next_80b.yaml` | Qwen3-Next 80B-A3B | Hybrid + MoE |
-| `glm4_flash.yaml` | GLM-4.7-Flash | MoE |
-| `llama3_8b.yaml` | Llama 3.1 8B | Dense |
-| `gpt_oss_20b.yaml` | GPT-OSS 20B | MoE |
-
-
-### Key Techniques
-
-- **Double buffering** for overlapped weight transfer between CPU and GPU
-- **Per-layer structure grouping** for hybrid/MoE architectures
-- **Gradient checkpointing** every K layers to reduce GPU memory
-- **Async gradient collection** with slab pool
-- **Manual gradient computation** (no autograd overhead)
-- **HuggingFace native Flash Attention** integration
-- **DeepSpeed CPUAdam** for 5-7x faster optimizer steps
-
-## Installation
+This branch expects a ROCm-enabled PyTorch build to already be installed in the environment. The install script verifies that first; it does not install a generic CPU/CUDA PyTorch wheel.
 
 ```bash
-git clone https://github.com/DLYuanGod/MegaTrain.git
+git clone https://github.com/chinmaydk99/MegaTrain.git
 cd MegaTrain
-pip install -e .
+git checkout ck-megatrain-rocm
 
-# Optional: faster attention & optimizer
-pip install flash-attn
-pip install flash-linear-attention causal-conv1d  # for Qwen3.5 linear attention
-pip install deepspeed                              # for CPUAdam optimizer
+bash scripts/install_rocm.sh
 ```
 
-## Troubleshooting
+The ROCm bootstrap:
 
-<details><summary><b>Out of Memory?</b></summary>
+- verifies `torch.version.hip`
+- installs MegaTrain editable
+- installs [`requirements-rocm.txt`](requirements-rocm.txt)
+- builds `causal-conv1d` from source with ROCm-safe flags
+- checks imports for Flash Attention, Flash CE, DeepSpeed CPUAdam, flash-linear-attention, and `causal_conv1d`
 
-- Reduce `batch_size` in config
-- Increase `checkpoint_interval`
-- Reduce `max_seq_len`
+See [`ROCM_ENVIRONMENT.md`](ROCM_ENVIRONMENT.md) for package notes and caveats.
 
-</details>
+## Quick Smoke Test
 
-<details><summary><b>Slow Training?</b></summary>
+```bash
+python examples/train.py \
+  --config examples/configs/qwen_7b_rocm_paper.yaml \
+  --num-steps 5 \
+  --eval-num-samples 8
+```
 
-- Use `deepspeed_adam` optimizer (5-7x faster than PyTorch AdamW)
-- Install Flash Attention
-- Install `flash-linear-attention` + `causal-conv1d` for Qwen3.5 models
-- Increase `num_workers` for data loading
+## Reproduce The 14B Sweep
 
-</details>
+MegaTrain:
 
-<details><summary><b>New Model Not Working?</b></summary>
+```bash
+python scripts/run_batch_sweep.py \
+  --config examples/configs/qwen_14b_rocm_batch_sweep.yaml \
+  --method megatrain \
+  --batch-sizes 16 32 64 96 128 192 256 \
+  --num-steps 5 \
+  --output-dir artifacts/mi355x_paper_demo/batch_sweep \
+  --stop-after-first-failure
+```
 
-- Ensure it's a decoder-only model (not encoder-decoder like T5)
-- Check `trust_remote_code: true` in config if the model requires it
-- Try `attn_implementation: "sdpa"` or `"eager"` if flash attention fails
+ZeRO-3 CPU offload:
 
-</details>
+```bash
+python scripts/run_batch_sweep.py \
+  --config examples/configs/qwen_14b_rocm_batch_sweep.yaml \
+  --method zero3_cpu_offload \
+  --batch-sizes 8 12 16 20 24 32 \
+  --num-steps 5 \
+  --output-dir artifacts/mi355x_paper_demo/batch_sweep \
+  --stop-after-first-failure
+```
 
-## Citation
+Native PyTorch:
 
-If you use MegaTrain in your research, please cite:
+```bash
+python scripts/run_batch_sweep.py \
+  --config examples/configs/qwen_14b_rocm_batch_sweep.yaml \
+  --method native \
+  --batch-sizes 4 8 12 16 \
+  --num-steps 5 \
+  --output-dir artifacts/mi355x_paper_demo/batch_sweep \
+  --stop-after-first-failure
+```
+
+FSDP CPU-offload probe:
+
+```bash
+python scripts/run_batch_sweep.py \
+  --config examples/configs/qwen_14b_rocm_batch_sweep.yaml \
+  --method fsdp_cpu_offload \
+  --batch-sizes 8 16 \
+  --num-steps 5 \
+  --output-dir artifacts/mi355x_paper_demo/batch_sweep \
+  --stop-after-first-failure
+```
+
+Regenerate the artifact summary, CSVs, and SVGs:
+
+```bash
+python scripts/assemble_mi355x_paper_demo.py
+```
+
+## How MegaTrain Works
+
+MegaTrain inverts the usual GPU-resident training model:
+
+1. Host memory is the authoritative store for weights, gradients, and optimizer states.
+2. GPU memory holds only the active layer, activation checkpoints, staging buffers, and transient compute state.
+3. Weights stream H2D layer-by-layer.
+4. Gradients stream D2H asynchronously.
+5. CPU-side optimizer state avoids keeping Adam moments resident in HBM.
+6. Double buffering overlaps parameter movement with compute.
+7. Block-wise recomputation bounds activation memory.
+
+The MI355X results are a good fit for this design because the accelerator has enough HBM to spend memory on large activation batches while host RAM carries persistent model state.
+
+## Supported Model And Data Paths
+
+MegaTrain uses HuggingFace model loading and local YAML configs. This branch has been exercised most heavily with Qwen2.5 models on MetaMathQA:
+
+- `Qwen/Qwen2.5-7B-Instruct`
+- `Qwen/Qwen2.5-14B-Instruct`
+- `Qwen/Qwen2.5-32B-Instruct`
+- `Qwen/Qwen2.5-72B-Instruct`
+
+Relevant configs:
+
+- [`examples/configs/qwen_7b_rocm_paper.yaml`](examples/configs/qwen_7b_rocm_paper.yaml)
+- [`examples/configs/qwen_14b_rocm_batch_sweep.yaml`](examples/configs/qwen_14b_rocm_batch_sweep.yaml)
+- [`examples/configs/qwen_14b_rocm_paper.yaml`](examples/configs/qwen_14b_rocm_paper.yaml)
+- [`examples/configs/qwen_32b_mi355x.yaml`](examples/configs/qwen_32b_mi355x.yaml)
+- [`examples/configs/qwen_72b_mi355x.yaml`](examples/configs/qwen_72b_mi355x.yaml)
+
+The data path supports `MetaMathQA` through the repo dataset loader. The paper-aligned split policy used for the benchmark is:
+
+- `train_ratio=0.7`
+- `eval_ratio=0.3`
+- `split_seed=42`
+- `max_seq_len=1024`
+
+## Caveats
+
+- This branch is an AMD ROCm / MI355X validation branch, not the upstream CUDA-default README.
+- The primary benchmark is single-accelerator. It does not claim to beat multi-GPU distributed training in that regime.
+- Native PyTorch is still the right baseline when the model and batch fit comfortably in HBM.
+- The short batch sweeps are throughput and capacity measurements, not final accuracy reproductions.
+- The 72B result is proof-of-life unless extended by a longer sustained run.
+- The ZeRO-3 baseline uses the DeepSpeed-managed optimizer config path required by this ROCm stack rather than a client-provided optimizer object.
+- `torchvision` is intentionally not part of the text-only ROCm bootstrap path.
+
+## Original Paper
+
+This work builds on MegaTrain:
 
 ```bibtex
 @misc{yuan2026megatrainprecisiontraining100b,
-      title={MegaTrain: Full Precision Training of 100B+ Parameter Large Language Models on a Single GPU}, 
+      title={MegaTrain: Full Precision Training of 100B+ Parameter Large Language Models on a Single GPU},
       author={Zhengqing Yuan and Hanchi Sun and Lichao Sun and Yanfang Ye},
       year={2026},
       eprint={2604.05091},
       archivePrefix={arXiv},
       primaryClass={cs.CL},
-      url={https://arxiv.org/abs/2604.05091}, 
+      url={https://arxiv.org/abs/2604.05091},
 }
 ```
 
-## Acknowledgement
+## Acknowledgements
 
-This project benefits from the following open-source works:
-
-- [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory) -- Our data loading system (`dataset_info.json` registry, alpaca/sharegpt format support) is inspired by LlamaFactory's elegant dataset management design. Thanks to [@hiyouga](https://github.com/hiyouga) and all contributors.
-- [HuggingFace Transformers](https://github.com/huggingface/transformers) -- Universal model loading and native Flash Attention integration.
-- [DeepSpeed](https://github.com/microsoft/DeepSpeed) -- SIMD-accelerated CPUAdam optimizer.
-- [Flash Attention](https://github.com/Dao-AILab/flash-attention) -- Memory-efficient attention and cross-entropy loss.
-- [Flash Linear Attention](https://github.com/fla-org/flash-linear-attention) -- Efficient linear attention kernels for hybrid models like Qwen3.5.
+This branch builds on the original MegaTrain implementation and the PyTorch ecosystem, including HuggingFace Transformers, DeepSpeed, Flash Attention, Flash Linear Attention, and LLaMA-Factory-style dataset conventions.
 
 ## License
 
